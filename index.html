@@ -32,6 +32,22 @@
 @media(max-width:900px){.rental-grid{grid-template-columns:1fr}}
 
 .binance-pay-card{background:linear-gradient(145deg,#101d38,#0b2550);border:1px solid #2b68a4;border-radius:15px;padding:18px;margin-bottom:17px}.binance-pay-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.binance-pay-head h3{margin:0 0 5px;font-size:18px}.binance-pay-head p{margin:0;color:#9ab7d8;font-size:12px}.binance-pay-body{display:flex;justify-content:center;margin:18px 0}.binance-qr-wrap{background:#fff;border-radius:14px;padding:14px;text-align:center;color:#0b2550;width:240px}.binance-qr-wrap img{display:block;width:210px;height:210px;object-fit:contain;margin:auto}.binance-qr-wrap div{font-weight:800;font-size:12px;margin-top:8px}.binance-qr-state{width:min(620px,100%);display:flex;align-items:center;gap:15px;background:#071a35;border:1px dashed #2b68a4;border-radius:12px;padding:18px;color:#dceeff}.binance-qr-placeholder{width:72px;height:72px;flex:0 0 72px;border-radius:12px;background:#f0b90b;color:#111;display:grid;place-items:center;font-size:34px;font-weight:900}.binance-qr-state strong{font-size:14px}.binance-qr-state p{margin:6px 0 0;color:#9ab7d8;font-size:12px;line-height:1.5}.binance-pay-note{font-size:11px;color:#9ab7d8;border-top:1px solid #1b4d86;padding-top:12px}.binance-pay-note strong{color:#f4cf55}.deposit-qr{background:#fff;border-radius:14px;padding:14px;width:240px;text-align:center;color:#0b2550;border:1px solid #cfe2f5}.deposit-qr img{display:block;width:210px;height:210px;object-fit:contain;margin:auto}.deposit-qr small{display:block;margin-top:8px;font-weight:700}.deposit-test-note{margin-top:12px;font-size:11px;color:#9ab7d8;line-height:1.5}.deposit-pending{background:#071a35;border:1px solid #24547f;border-radius:12px;padding:14px;margin-top:14px}.deposit-pending strong{color:#8af0c6}.deposit-pending code{color:#dff0ff;word-break:break-all}
+
+/* Responsive sidebar menu and logout placement */
+.sidebar-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.menu-toggle{display:none;background:#153252;color:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14px;font-weight:700;cursor:pointer}
+.sidebar-menu{display:flex;flex-direction:column;gap:20px;flex:1;min-height:0}
+.sidebar-menu .logout{margin-top:auto}
+@media(max-width:760px){
+ .sidebar{padding:15px;gap:0}
+ .sidebar-header{width:100%}
+ .menu-toggle{display:inline-flex;align-items:center;gap:7px}
+ .sidebar-menu{display:none;padding-top:16px;gap:16px}
+ .sidebar-menu.open{display:flex}
+ .sidebar-menu nav{display:grid;grid-template-columns:1fr;overflow:visible;gap:5px}
+ .sidebar-menu nav button{white-space:normal;text-align:left;width:100%}
+ .sidebar-menu .logout{margin-top:0;width:100%}
+}
 </style>
 </head>
 <body>
@@ -57,24 +73,29 @@
 
 <div id="appScreen" class="app hidden">
 <aside class="sidebar">
- <div class="brand">Fas<span>Tech</span><small>TOOLS · SERVICES · SOLUTIONS</small></div>
- <div class="profile"><strong id="sideName">Customer</strong><br><small id="sideEmail">Customer account</small></div>
- <nav>
-  <button class="active" data-section="dashboard">⌂ Dashboard</button>
-  <button data-section="marketplace">▣ Tools Marketplace</button>
-  <button data-section="rental">◷ Rental Service</button>
-  <button data-section="server">☁ Server Services</button>
-  <button data-section="refill">◉ Server Credits Refill</button>
-  <button data-section="imei">▦ IMEI Services</button>
-  <button data-section="activation">⚙ Activation Tools</button>
-  <button data-section="deposit">▣ Payment / Deposit</button>
-  <button data-section="myrentals">↻ My Rentals</button>
-  <button data-section="orders">▤ My Orders</button>
-  <button data-section="transactions">⇄ Transactions</button>
-  <button data-section="support">♧ Support</button>
-  <button data-section="profile">● My Profile</button>
- </nav>
- <button class="logout" id="logout">Log out</button>
+ <div class="sidebar-header">
+  <div class="brand">Fas<span>Tech</span><small>TOOLS · SERVICES · SOLUTIONS</small></div>
+  <button type="button" class="menu-toggle" id="menuToggle" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Open navigation menu">☰ Menu</button>
+ </div>
+ <div class="sidebar-menu" id="sidebarMenu">
+  <div class="profile"><strong id="sideName">Customer</strong><br><small id="sideEmail">Customer account</small></div>
+  <nav>
+   <button class="active" data-section="dashboard">⌂ Dashboard</button>
+   <button data-section="marketplace">▣ Tools Marketplace</button>
+   <button data-section="rental">◷ Rental Service</button>
+   <button data-section="server">☁ Server Services</button>
+   <button data-section="refill">◉ Server Credits Refill</button>
+   <button data-section="imei">▦ IMEI Services</button>
+   <button data-section="activation">⚙ Activation Tools</button>
+   <button data-section="deposit">▣ Payment / Deposit</button>
+   <button data-section="myrentals">↻ My Rentals</button>
+   <button data-section="orders">▤ My Orders</button>
+   <button data-section="transactions">⇄ Transactions</button>
+   <button data-section="support">♧ Support</button>
+   <button data-section="profile">● My Profile</button>
+  </nav>
+  <button class="logout" id="logout">Log out</button>
+ </div>
 </aside>
 <main class="main">
  <div class="top"><input class="search" placeholder="⌕   Search tools, services, or anything..."><div class="topright"><span>🔔</span><span>Good Evening,<br><strong id="topName" style="color:white">Customer</strong></span></div></div>
@@ -301,13 +322,13 @@ $("registerTab").onclick=()=>{$("registerTab").classList.add("active");$("loginT
 $("loginForm").onsubmit=async e=>{e.preventDefault();message("Signing in...");const {data,error}=await sb.auth.signInWithPassword({email:$("loginEmail").value,password:$("loginPassword").value});if(error)return message(error.message,true);await enterApp(data.user)};
 $("registerForm").onsubmit=async e=>{e.preventDefault();message("Creating account...");const {data,error}=await sb.auth.signUp({email:$("registerEmail").value,password:$("registerPassword").value,options:{data:{full_name:$("registerName").value}}});if(error)return message(error.message,true);if(data.user&&!data.session)message("Account created. Check your email to confirm the account, then login.");else if(data.user)await enterApp(data.user)};
 $("logout").onclick=async()=>{await sb.auth.signOut();location.reload()};
-document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>showSection(b.dataset.section)));
+$("menuToggle").onclick=()=>{const menu=$("sidebarMenu");const open=menu.classList.toggle("open");$("menuToggle").setAttribute("aria-expanded",String(open));$("menuToggle").setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");$("menuToggle").textContent=open?"✕ Close":"☰ Menu"};document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{showSection(b.dataset.section);if(window.matchMedia("(max-width:760px)").matches){$("sidebarMenu").classList.remove("open");$("menuToggle").setAttribute("aria-expanded","false");$("menuToggle").setAttribute("aria-label","Open navigation menu");$("menuToggle").textContent="☰ Menu"}}));
 document.querySelectorAll("[data-section-link]").forEach(b=>b.addEventListener("click",()=>showSection(b.dataset.sectionLink)));
 $("createDepositBtn").onclick=createDepositIntent;
 $("mobileMoneyPayBtn").onclick=startMobileMoneyPayment;
 loadMobileMoneyRate();
 $("copyAddress").onclick=async()=>{try{await navigator.clipboard.writeText(RECEIVING_ADDRESS);toast("FasTech address copied.")}catch{toast("Copy failed; select the address manually.",true)}};
-$("ticketBtn").onclick=submitTicket;$("saveProfileBtn").onclick=saveProfile;
+$("ticketBtn").onclick=submitTicket;
 $("rentalSearch").addEventListener("input",e=>{rentalSearchText=e.target.value.trim().toLowerCase();renderRentalCatalog()});$("serverSearch").addEventListener("input",e=>{serverSearchText=e.target.value.trim().toLowerCase();renderServerCatalog()});document.querySelectorAll("[data-server-filter]").forEach(b=>b.addEventListener("click",()=>{serverFilter=b.dataset.serverFilter;document.querySelectorAll("[data-server-filter]").forEach(x=>x.classList.toggle("active",x===b));renderServerCatalog()}));
 sb.auth.onAuthStateChange((_event,session)=>{if(session&&!currentUser)enterApp(session.user)});
 renderBinancePayQR();
