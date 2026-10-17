@@ -150,7 +150,7 @@
  <section class="section" id="refill"><div class="card"><h2>Server Credits Refill</h2><p class="sub">Refill credits for your server service accounts.</p><div class="field"><label>Select Tool</label><select><option>MRT Tool</option><option>Chimera Tool</option><option>UnlockTool</option><option>Sigma Tool</option></select></div><div class="field"><label>Credits Required</label><input type="number" value="100" min="1"></div><button class="btn orange" onclick="demoAction('Refill request submitted')">Request Refill</button></div></section>
  <section class="section" id="imei"><div class="card"><h2>IMEI Services</h2><p class="sub">Request supported IMEI checking and servicing solutions.</p><button class="btn blue" onclick="demoAction('IMEI service request submitted')">Start IMEI Service</button></div></section>
  <section class="section" id="activation"><div class="card"><h2>Activation Tools</h2><p class="sub">Manage your activation tool requests and access.</p><button class="btn blue" onclick="demoAction('Activation request submitted')">Request Activation Tool</button></div></section>
- <section class="section" id="deposit"><div class="card"><h2>Payment / Deposit</h2><p class="sub">Add USDT to your FasTech wallet. Binance Pay is shown first for quick payment; TRON / TRC20 remains available for blockchain deposits.</p>
+ <section class="section" id="deposit"><div class="card"><h2>Payment / Deposit</h2><p class="sub">Add funds to your FasTech wallet using the available payment options.</p>
 <div class="binance-pay-card">
  <div class="binance-pay-head"><div><h3>Binance Pay</h3><p>Scan the official FasTech Binance Pay QR with the Binance app.</p></div><span class="tag">QUICK PAYMENT</span></div>
  <div class="binance-pay-body">
@@ -168,17 +168,7 @@
  <button class="btn green" id="mobileMoneyPayBtn">Pay with Airtel Money / Mpamba</button>
  <div id="mobileMoneyStatus" class="message"></div>
 </div>
-<div class="notice"><strong>TRC20 deposit:</strong> this remains available as a blockchain deposit option. Admin can confirm a pending request and credit the USDT wallet.</div>
-<div style="display:flex;justify-content:center;margin:18px 0">
-  <div class="deposit-qr"><img id="depositQrImage" alt="FasTech USDT TRC20 receiving QR"><small>Scan to send USDT (TRC20)</small></div>
-</div>
-<div class="notice"><strong>FasTech receiving address (TRC20)</strong><div id="depositAddress" style="word-break:break-all;font-family:monospace;background:#071a35;border:1px solid #24547f;border-radius:8px;padding:10px;margin-top:7px;color:#dff0ff">THeaEcztwe6VugEh3Vie3RfH9j4uJzRHLV</div><button class="btn outline" style="margin-top:10px" id="copyAddress">Copy Address</button></div>
-<div class="field"><label>Amount in USDT</label><input id="depositAmount" type="number" min="1" max="100000" step="0.000001" value="1"></div>
-<div class="field"><label>Your TRON sender address</label><input id="senderAddress" maxlength="34" placeholder="T... wallet address you will send from"></div>
-<button class="btn blue" id="createDepositBtn">Create Deposit Request</button>
-<div id="depositRequestBox" class="hidden">
-  <div class="deposit-pending"><strong>Deposit Request Created</strong><div id="depositStatus" class="message"></div><div class="deposit-test-note">For this test, leave the request pending. Admin will enter the real transaction hash and click <b>Accept & Credit</b>. Your wallet balance will update after confirmation.</div></div>
-</div></div></section>
+</div></section>
  <section class="section" id="myrentals"><div class="card"><h2>My Rentals</h2><p class="sub">Your active and previous rental requests.</p><div class="tablewrap"><table class="table"><thead><tr><th>Tool</th><th>Status</th><th>Period</th><th>Start</th><th>Expires</th><th>Amount</th></tr></thead><tbody id="rentalsRows"><tr><td colspan="6" style="color:#9ab7d8">No rentals yet.</td></tr></tbody></table></div></div></section>
  <section class="section" id="orders"><div class="card"><h2>My Orders</h2><p class="sub">Track your tool purchases and service orders.</p><div class="tablewrap"><table class="table"><thead><tr><th>Date</th><th>Order</th><th>Type</th><th>Amount</th><th>Status</th></tr></thead><tbody id="ordersRows"><tr><td colspan="5" style="color:#9ab7d8">No orders yet.</td></tr></tbody></table></div></div></section>
  <section class="section" id="transactions"><div class="card"><h2>Transactions</h2><p class="sub">All wallet, refill, rental and service transactions.</p><div class="tablewrap"><table class="table"><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead><tbody id="allTx"><tr><td colspan="5" style="color:#9ab7d8">No transactions yet.</td></tr></tbody></table></div></div></section>
@@ -293,19 +283,6 @@ async function startMobileMoneyPayment(){
  const b=$("mobileMoneyPayBtn");b.disabled=true;b.textContent="Opening payment…";$("mobileMoneyStatus").textContent="Creating secure payment request…";
  try{const {data,error}=await sb.functions.invoke("paychangu-checkout",{body:{usdt_amount:usdt}});if(error)throw error;if(data?.error)throw new Error(data.error);$("mobileMoneyStatus").textContent=`Payment amount: MK ${Number(data.amount_mwk).toLocaleString()} for ${Number(data.amount_usdt).toFixed(2)} USDT. Choose Airtel Money or TNM Mpamba on the payment page.`;window.location.href=data.checkout_url}catch(e){$("mobileMoneyStatus").textContent=e.message||"Could not start payment.";toast(e.message||"Could not start payment.",true)}finally{b.disabled=false;b.textContent="Pay with Airtel Money / Mpamba"}
 }
-async function createDepositIntent(){
- const amount=Number($("depositAmount").value),sender=$("senderAddress").value.trim();
- if(!Number.isFinite(amount)||amount<1||amount>100000)return toast("Amount must be between 1 and 100000 USDT.",true);
- if(!/^[1-9A-HJ-NP-Za-km-z]{34}$/.test(sender))return toast("Enter a valid TRON sender address.",true);
- const b=$("createDepositBtn");b.disabled=true;b.textContent="Creating…";
- try{const {data,error}=await sb.rpc("create_usdt_deposit_intent",{p_amount_usdt:amount,p_sender_address:sender});if(error)throw error;currentDepositIntent=data;$("depositRequestBox").classList.remove("hidden");$("depositStatus").textContent=`Request created for ${Number(data.amount_usdt).toFixed(6)} USDT. Send the exact amount to the FasTech receiving address.`;toast("Deposit request created.")}catch(e){toast(e.message||"Could not create request.",true)}finally{b.disabled=false;b.textContent="Create Deposit Request"}
-}
-async function verifyDeposit(){
- if(!currentDepositIntent)return toast("Create a deposit request first.",true);
- const tx=$("depositTxHash").value.trim();if(!/^[a-fA-F0-9]{64}$/.test(tx))return toast("Enter the full 64-character TRON transaction hash.",true);
- const b=$("verifyDepositBtn");b.disabled=true;b.textContent="Verifying…";
- try{const {data,error}=await sb.functions.invoke("verify-usdt-deposit",{body:{intent_id:currentDepositIntent.id,tx_hash:tx}});if(error)throw error;if(data?.error)throw new Error(data.error);$("depositStatus").textContent=`Payment confirmed: ${Number(data.amount||0).toFixed(6)} USDT added to your wallet.`;toast("USDT deposit confirmed.");currentDepositIntent=null;await loadDashboardData()}catch(e){$("depositStatus").textContent=e.message||"Payment could not be verified yet.";toast(e.message||"Verification failed.",true)}finally{b.disabled=false;b.textContent="Verify Payment"}
-}
 async function submitTicket(){
  const subject=$("ticketSubject").value.trim(),category=$("ticketCategory").value,priority=$("ticketPriority").value,messageText=$("ticketMessage").value.trim();
  if(subject.length<3||messageText.length<5)return toast("Enter a subject and a clear message.",true);
@@ -324,10 +301,8 @@ $("registerForm").onsubmit=async e=>{e.preventDefault();message("Creating accoun
 $("logout").onclick=async()=>{await sb.auth.signOut();location.reload()};
 $("menuToggle").onclick=()=>{const menu=$("sidebarMenu");const open=menu.classList.toggle("open");$("menuToggle").setAttribute("aria-expanded",String(open));$("menuToggle").setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");$("menuToggle").textContent=open?"✕ Close":"☰ Menu"};document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{showSection(b.dataset.section);if(window.matchMedia("(max-width:760px)").matches){$("sidebarMenu").classList.remove("open");$("menuToggle").setAttribute("aria-expanded","false");$("menuToggle").setAttribute("aria-label","Open navigation menu");$("menuToggle").textContent="☰ Menu"}}));
 document.querySelectorAll("[data-section-link]").forEach(b=>b.addEventListener("click",()=>showSection(b.dataset.sectionLink)));
-$("createDepositBtn").onclick=createDepositIntent;
 $("mobileMoneyPayBtn").onclick=startMobileMoneyPayment;
 loadMobileMoneyRate();
-$("copyAddress").onclick=async()=>{try{await navigator.clipboard.writeText(RECEIVING_ADDRESS);toast("FasTech address copied.")}catch{toast("Copy failed; select the address manually.",true)}};
 $("ticketBtn").onclick=submitTicket;
 $("rentalSearch").addEventListener("input",e=>{rentalSearchText=e.target.value.trim().toLowerCase();renderRentalCatalog()});$("serverSearch").addEventListener("input",e=>{serverSearchText=e.target.value.trim().toLowerCase();renderServerCatalog()});document.querySelectorAll("[data-server-filter]").forEach(b=>b.addEventListener("click",()=>{serverFilter=b.dataset.serverFilter;document.querySelectorAll("[data-server-filter]").forEach(x=>x.classList.toggle("active",x===b));renderServerCatalog()}));
 sb.auth.onAuthStateChange((_event,session)=>{if(session&&!currentUser)enterApp(session.user)});
