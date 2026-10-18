@@ -48,6 +48,13 @@
  .sidebar-menu nav button{white-space:normal;text-align:left;width:100%}
  .sidebar-menu .logout{margin-top:0;width:100%}
 }
+
+/* WhatsApp customer support shortcut */
+.whatsapp-support{position:fixed;right:22px;bottom:22px;z-index:1000;display:inline-flex;align-items:center;justify-content:center;gap:10px;padding:13px 18px;border-radius:999px;background:#25D366;color:#fff;text-decoration:none;font-weight:800;font-size:14px;box-shadow:0 8px 24px #0006;border:1px solid #65e695;transition:transform .15s,box-shadow .15s}
+.whatsapp-support:hover{transform:translateY(-2px);box-shadow:0 12px 30px #0007}
+.whatsapp-support svg{width:23px;height:23px;flex:0 0 23px;fill:currentColor}
+@media(max-width:760px){.whatsapp-support{right:14px;bottom:14px;padding:12px 15px;font-size:13px}}
+
 </style>
 </head>
 <body>
@@ -175,6 +182,11 @@
  <section class="section" id="support"><div class="card"><h2>Customer Support</h2><p class="sub">Send a message to the FasTech support team.</p><div class="field"><label>Subject</label><input id="ticketSubject" placeholder="Example: Payment not confirmed"></div><div class="field"><label>Category</label><select id="ticketCategory"><option value="payment">Payment</option><option value="tool">Tool</option><option value="rental">Rental</option><option value="account">Account</option><option value="general">Other</option></select></div><div class="field"><label>Priority</label><select id="ticketPriority"><option>normal</option><option>high</option></select></div><div class="field"><label>Message</label><textarea id="ticketMessage" placeholder="Describe your issue"></textarea></div><button class="btn blue" id="ticketBtn">Submit Ticket</button><div id="ticketStatus" class="message"></div></div></section>
  <section class="section" id="profile"><div class="card"><h2>My Profile</h2><p class="sub">Update your customer profile details.</p><div class="field"><label>Full Name</label><input id="profileInput"></div><button class="btn blue" onclick="saveProfile()">Save Profile</button></div></section>
  <div class="footer"><span>© 2025 FasTech. All rights reserved.</span><span>Fast · Secure · Reliable · For Everyone</span><span>support: alubiassan70@gmail.com · WhatsApp: 0999761141</span></div>
+
+<a class="whatsapp-support" href="https://wa.me/265999761141?text=Hello%20FasTech%20Support%2C%20I%20need%20help%20with%20my%20account." target="_blank" rel="noopener noreferrer" aria-label="Chat with FasTech Support on WhatsApp">
+ <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16.04 3C8.87 3 3.04 8.78 3.04 15.9c0 2.28.6 4.51 1.75 6.48L3 29l6.8-1.77a13.1 13.1 0 0 0 6.23 1.57h.01c7.17 0 13-5.79 13-12.9A12.85 12.85 0 0 0 16.04 3zm0 23.6c-1.94 0-3.84-.52-5.49-1.51l-.39-.23-4.03 1.05 1.08-3.9-.25-.4a10.6 10.6 0 0 1-1.64-5.7c0-5.9 4.83-10.7 10.73-10.7s10.7 4.8 10.7 10.7-4.8 10.69-10.7 10.69zm5.88-8.02c-.32-.16-1.9-.93-2.2-1.03-.3-.11-.51-.16-.72.16-.22.32-.83 1.03-1.02 1.24-.19.21-.38.24-.7.08-.33-.16-1.38-.51-2.63-1.62-.97-.86-1.63-1.91-1.82-2.24-.19-.32-.02-.49.14-.65.14-.14.32-.38.49-.57.16-.19.22-.32.32-.54.11-.21.06-.4-.02-.56-.08-.16-.72-1.72-.99-2.36-.26-.62-.53-.54-.72-.55h-.62c-.22 0-.57.08-.86.4-.3.32-1.13 1.1-1.13 2.67s1.16 3.1 1.32 3.31c.16.22 2.28 3.47 5.52 4.87.77.33 1.37.53 1.84.68.77.24 1.47.21 2.02.13.62-.09 1.9-.78 2.17-1.53.27-.76.27-1.4.19-1.53-.08-.14-.3-.22-.62-.38z"/></svg>
+ <span>Chat with Support</span>
+</a>
 </main></div>
 
 <script>
