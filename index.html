@@ -98,7 +98,7 @@
  </div>
 </aside>
 <main class="main">
- <div class="top"><input class="search" placeholder="⌕   Search tools, services, or anything..."><div class="topright"><span>🔔</span><span>Good Evening,<br><strong id="topName" style="color:white">Customer</strong></span></div></div>
+ <div class="top"><input class="search" placeholder="⌕   Search tools, services, or anything..."><div class="topright"><span>🔔</span><span><span id="greetingText">Good morning,</span><br><strong id="topName" style="color:white">Customer</strong></span></div></div>
  <div class="heading"><div><h1 id="pageTitle">Dashboard</h1><p>Fast, secure and reliable online tools services.</p></div><span class="tag">CUSTOMER AREA</span></div>
 
  <section class="section active" id="dashboard">
@@ -210,12 +210,18 @@ function renderBinancePayQR(){
  else{state.classList.remove("hidden");wrap.classList.add("hidden")}
 }
 async function loadUser(){const {data:{session}}=await sb.auth.getSession();if(session)await enterApp(session.user);else{$("authScreen").classList.remove("hidden");$("appScreen").classList.add("hidden")}}
+function updateTimeGreeting(){
+ const hour=new Date().getHours();
+ const greeting=hour>=5&&hour<12?"Good morning,":hour>=12&&hour<17?"Good afternoon,":"Good evening,";
+ const el=$("greetingText");if(el)el.textContent=greeting;
+}
 async function enterApp(user){
  currentUser=user;
  const {data:profile,error}=await sb.from("profiles").select("*").eq("id",user.id).maybeSingle();
  if(error){message(error.message,true);return}
  if(profile?.role&&profile.role!=="customer"){await sb.auth.signOut();message("This page is for customer accounts only. Admin accounts must use the admin portal.",true);return}
  currentProfile=profile||{};
+ updateTimeGreeting();
  const name=currentProfile.full_name||user.email?.split("@")[0]||"Customer";
  $("sideName").textContent=name;$("topName").textContent=name;$("welcomeName").textContent=name;$("sideEmail").textContent=user.email||"Customer account";$("profileInput").value=name;
  $("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");await loadDashboardData();
