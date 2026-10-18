@@ -77,7 +77,7 @@
  <button class="logout" id="logout">Log out</button>
 </aside>
 <main class="main">
- <div class="top"><input class="search" placeholder="⌕   Search tools, services, or anything..."><div class="topright"><span>🔔</span><span>Good Evening,<br><strong id="topName" style="color:white">Customer</strong></span></div></div>
+ <div class="top"><input class="search" placeholder="⌕   Search tools, services, or anything..."><div class="topright"><span>🔔</span><span><span id="greetingText">Good morning,</span><br><strong id="topName" style="color:white">Customer</strong></span></div></div>
  <div class="heading"><div><h1 id="pageTitle">Dashboard</h1><p>Fast, secure and reliable online tools services.</p></div><span class="tag">CUSTOMER AREA</span></div>
 
  <section class="section active" id="dashboard">
@@ -212,6 +212,9 @@ async function enterApp(user){
  if(error){message(error.message,true);return}
  if(profile?.role&&profile.role!=="customer"){await sb.auth.signOut();message("This page is for customer accounts only. Admin accounts must use the admin portal.",true);return}
  currentProfile=profile||{};
+ const hour=new Date().getHours();
+ const greeting=hour>=5&&hour<12?"Good morning,":hour>=12&&hour<17?"Good afternoon,":"Good evening,";
+ $("greetingText").textContent=greeting;
  const name=currentProfile.full_name||user.email?.split("@")[0]||"Customer";
  $("sideName").textContent=name;$("topName").textContent=name;$("welcomeName").textContent=name;$("sideEmail").textContent=user.email||"Customer account";$("profileInput").value=name;
  $("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");await loadDashboardData();
