@@ -228,16 +228,19 @@ function updateTimeGreeting(){
  const greeting=hour>=5&&hour<12?"Good morning,":hour>=12&&hour<17?"Good afternoon,":"Good evening,";
  const el=$("greetingText");if(el)el.textContent=greeting;
 }
+let enteringUserId=null;
 async function enterApp(user){
+ if(enteringUserId===user.id)return;
+ enteringUserId=user.id;
  currentUser=user;
  const {data:profile,error}=await sb.from("profiles").select("*").eq("id",user.id).maybeSingle();
- if(error){message(error.message,true);return}
- if(profile?.role&&profile.role!=="customer"){await sb.auth.signOut();message("This page is for customer accounts only. Admin accounts must use the admin portal.",true);return}
+ if(error){message("Could not load your customer profile: "+error.message,true);enteringUserId=null;return}
+ if(profile?.role&&profile.role!=="customer"){await sb.auth.signOut();currentUser=null;enteringUserId=null;message("This page is for customer accounts only. Admin accounts must use the admin portal.",true);return}
  currentProfile=profile||{};
  updateTimeGreeting();
  const name=currentProfile.full_name||user.email?.split("@")[0]||"Customer";
  $("sideName").textContent=name;$("topName").textContent=name;$("welcomeName").textContent=name;$("sideEmail").textContent=user.email||"Customer account";$("profileInput").value=name;
- $("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");await loadDashboardData();
+ $("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");try{await loadDashboardData()}catch(err){console.error("FasTech dashboard load error:",err);toast("Signed in, but dashboard data could not load: "+(err?.message||"Please refresh."),true)}finally{enteringUserId=null}
 }
 async function loadDashboardData(){
  const {data,error}=await sb.rpc("get_customer_usdt_dashboard");
@@ -317,7 +320,7 @@ async function saveProfile(){
 }
 $("loginTab").onclick=()=>{$("loginTab").classList.add("active");$("registerTab").classList.remove("active");$("loginForm").classList.remove("hidden");$("registerForm").classList.add("hidden");message("")};
 $("registerTab").onclick=()=>{$("registerTab").classList.add("active");$("loginTab").classList.remove("active");$("registerForm").classList.remove("hidden");$("loginForm").classList.add("hidden");message("")};
-$("loginForm").onsubmit=async e=>{e.preventDefault();message("Signing in...");const {data,error}=await sb.auth.signInWithPassword({email:$("loginEmail").value,password:$("loginPassword").value});if(error)return message(error.message,true);await enterApp(data.user)};
+$("loginForm").onsubmit=async e=>{e.preventDefault();const btn=$("loginForm").querySelector("button[type=submit]");if(btn)btn.disabled=true;message("Signing in...");try{const {data,error}=await sb.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error){message(error.message,true);return}await enterApp(data.user);if($("authScreen").classList.contains("hidden"))message("");}catch(err){console.error("FasTech login error:",err);message("Login could not finish: "+(err?.message||"Unexpected error")+". Please check your internet connection and try again.",true)}finally{if(btn)btn.disabled=false}};
 $("registerForm").onsubmit=async e=>{e.preventDefault();message("Creating account...");const {data,error}=await sb.auth.signUp({email:$("registerEmail").value,password:$("registerPassword").value,options:{data:{full_name:$("registerName").value}}});if(error)return message(error.message,true);if(data.user&&!data.session)message("Account created. Check your email to confirm the account, then login.");else if(data.user)await enterApp(data.user)};
 $("logout").onclick=async()=>{await sb.auth.signOut();location.reload()};
 $("menuToggle").onclick=()=>{const menu=$("sidebarMenu");const open=menu.classList.toggle("open");$("menuToggle").setAttribute("aria-expanded",String(open));$("menuToggle").setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");$("menuToggle").textContent=open?"✕ Close":"☰ Menu"};document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{showSection(b.dataset.section);if(window.matchMedia("(max-width:760px)").matches){$("sidebarMenu").classList.remove("open");$("menuToggle").setAttribute("aria-expanded","false");$("menuToggle").setAttribute("aria-label","Open navigation menu");$("menuToggle").textContent="☰ Menu"}}));
