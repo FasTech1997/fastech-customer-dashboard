@@ -66,6 +66,29 @@
 .promo-price{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:9px 0 12px}.promo-old{text-decoration:line-through;color:#9ab7d8}.promo-new{font-size:19px;font-weight:900;color:#16d69b}
 .promo-empty{display:none}
 @media(max-width:600px){.promo-grid{grid-template-columns:1fr}.promo-card img{max-height:190px}}
+
+/* Shared supplier-style order details for Rental, Server and IMEI services */
+.order-preview-modal{position:fixed;inset:0;z-index:10001;display:grid;place-items:center;padding:16px}
+.order-preview-modal.hidden{display:none!important}
+.order-preview-backdrop{position:absolute;inset:0;background:#020916df;backdrop-filter:blur(4px)}
+.order-preview-panel{position:relative;width:min(620px,100%);max-height:92vh;overflow:auto;background:#fff;color:#202631;border:1px solid #dfe5ec;border-radius:15px;box-shadow:0 24px 80px #0008}
+.order-preview-hero{width:100%;max-height:240px;object-fit:cover;display:block;background:#111923}
+.order-preview-content{padding:22px}
+.order-preview-breadcrumb{font-size:13px;color:#737d89;margin-bottom:12px}
+.order-preview-title{font-size:clamp(21px,4vw,29px);line-height:1.25;margin:0 0 18px;color:#222a35}
+.order-preview-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border:1px solid #e4e8ed;margin:18px 0}
+.order-preview-stat{padding:13px 10px;border-right:1px solid #e4e8ed;min-width:0}
+.order-preview-stat:last-child{border-right:0}
+.order-preview-stat small{display:block;color:#87909b;font-size:11px;text-transform:uppercase;margin-bottom:8px}
+.order-preview-stat strong{font-size:clamp(13px,3vw,20px);overflow-wrap:anywhere}
+.order-preview-stat .delivery{color:#e58b12}.order-preview-stat .online{color:#279b7a}
+.order-preview-terms{display:flex;gap:10px;align-items:flex-start;margin:18px 0;color:#444d58;line-height:1.5}
+.order-preview-terms input{width:22px;height:22px;flex:0 0 22px;accent-color:#078b82}
+.order-preview-submit{width:100%;padding:17px;background:#111923;color:#fff;border:0;border-radius:10px;font-size:16px;cursor:pointer}
+.order-preview-submit:disabled{opacity:.55;cursor:not-allowed}
+.order-preview-close{position:absolute;right:10px;top:10px;z-index:1;background:#fff;color:#222;border:0;border-radius:50%;width:38px;height:38px;font-size:25px;cursor:pointer;box-shadow:0 2px 8px #0003}
+@media(max-width:480px){.order-preview-content{padding:17px}.order-preview-stats{grid-template-columns:1fr}.order-preview-stat{border-right:0;border-bottom:1px solid #e4e8ed;display:flex;justify-content:space-between;align-items:center;gap:12px}.order-preview-stat:last-child{border-bottom:0}.order-preview-stat small{margin:0}.order-preview-hero{max-height:190px}}
+
 </style>
 </head>
 <body>
@@ -301,7 +324,7 @@ function toolCard(t,rental=false){const basePrice=Number(rental?t.rental_price_u
 let rentalToolsCache=[];let rentalFilter='all';let rentalSearchText='';
 function rentalPeriodLabel(days){const d=Number(days||1);if(d===1)return '24 Hours';if(d===2)return '48 Hours';if(d===7)return '7 Days';if(d===30)return '30 Days';return `${d} Days`}
 function rentalCard(t){const basePrice=Number(t.rental_price_usdt||0);const deal=promoPrice(t,"rental",basePrice);const price=deal.price;const priceHtml=deal.promotion?`<span style="text-decoration:line-through;color:#9ab7d8;margin-right:7px">${money(basePrice)}</span><span style="color:#ffda66">${money(price)}</span>`:`${money(price)}`;const img=t.icon_url?`<img src="${esc(t.icon_url)}" alt="${esc(t.name)}">`:'<span class="fallback">🛠</span>';const days=Number(t.rental_days||1);const duration=/unlock\s*tool/i.test(String(t.name||""))&&/6\s*hrs?/i.test(String(t.name||""))?"6 Hours":rentalPeriodLabel(days);return `<article class="rental-item"><div class="rental-logo">${img}</div><div class="rental-info"><div class="rental-name">${esc(t.name)}</div><div class="rental-meta"><span class="rental-badge time">INSTANT DELIVERY</span></div><div class="rental-price">${priceHtml} USDT</div><div class="rental-actions"><button class="btn purple" onclick="placeTool('${t.id}','rental')">Rent Now</button><button class="btn outline" onclick="showRentalDetails('${t.id}')">Details</button></div></div></article>`}
-function showRentalDetails(id){const t=rentalToolsCache.find(x=>x.id===id);if(!t)return;const price=Number(t.rental_price_usdt||0);toast(`${t.name} • ${money(price)} USDT • ${rentalPeriodLabel(t.rental_days)}. Your wallet is charged only after you confirm the order.`)}
+function showRentalDetails(id){openToolOrderPreview(id,"rental")}
 function renderRentalFilters(tools){const periods=[...new Set(tools.map(t=>Number(t.rental_days||1)))] .sort((a,b)=>a-b);$("rentalFilters").innerHTML=`<button class="rental-filter ${rentalFilter==='all'?'active':''}" onclick="setRentalFilter('all')">All</button>`+periods.map(d=>`<button class="rental-filter ${String(rentalFilter)===String(d)?'active':''}" onclick="setRentalFilter('${d}')">${rentalPeriodLabel(d)}</button>`).join('')}
 function setRentalFilter(v){rentalFilter=v;renderRentalCatalog()}
 function renderRentalCatalog(){let rows=rentalToolsCache.filter(t=>Number(t.rental_price_usdt)>0);if(rentalFilter!=='all')rows=rows.filter(t=>Number(t.rental_days||1)===Number(rentalFilter));if(rentalSearchText)rows=rows.filter(t=>`${t.name} ${t.description||''}`.toLowerCase().includes(rentalSearchText));$("rentalTools").innerHTML=rows.length?rows.map(rentalCard).join(''):'<div class="rental-empty">No rental tools match your search.</div>';renderRentalFilters(rentalToolsCache.filter(t=>Number(t.rental_price_usdt)>0))}
@@ -316,7 +339,7 @@ function serverCard(t){
  return '<article class="service tsm-product-card"><div class="tsm-card-open" style="cursor:default"><div class="server-logo">'+img+'</div><div class="server-info"><div class="server-name">'+esc(t.name)+'</div><div class="server-desc">'+esc(t.description||'Server service supplied through FasTech.')+'</div><div class="server-price">'+(price>0?money(price)+' USDT':'')+'</div><span class="rental-badge '+(supplierUnavailable?'time':'')+'">'+(supplierUnavailable?'Supplier confirmation required':'Available')+'</span><div class="rental-actions" style="margin-top:12px"><button class="btn outline" type="button" onclick="showServerDetails(\''+esc(t.id)+'\')">Details</button>'+orderButton+'</div></div></div></article>';
 }
 function renderServerCatalog(){let rows=serverToolsCache.filter(t=>t.is_active!==false&&Number(t.price_usdt)>0&&(String(t.supplier_group_type||'').toUpperCase()==='SERVER'||String(t.supplier_service_type||'').toUpperCase()==='SERVER'));if(serverSearchText)rows=rows.filter(t=>`${t.name} ${t.description||''}`.toLowerCase().includes(serverSearchText));$("serverTools").innerHTML=rows.length?rows.map(serverCard).join(''):'<div class="rental-empty">No priced server services are published yet. In Products Manager, set the FasTech price and activate the product.</div>'}
-function showServerDetails(id){const t=serverToolsCache.find(x=>x.id===id);if(!t)return toast("Tool details are not available.",true);const img=t.icon_url?`<img src="${esc(t.icon_url)}" alt="${esc(t.name)}">`:'<div class="tsm-detail-logo">TSM</div>';const price=Number(t.price_usdt||65.99);$("tsmDetailsContent").innerHTML=`<div class="tsm-detail-head">${img}<div><h2 id="tsmDetailsTitle">${esc(t.name)}</h2><p>1-year license · 1 PC</p><strong>${money(price)} USDT</strong></div></div><div class="tsm-detail-row"><span>Price</span><strong>${money(price)} USDT</strong></div><div class="tsm-detail-row"><span>Delivery</span><strong>Instant (supplier-dependent)</strong></div><div class="tsm-detail-row"><span>Current service status</span><strong style="color:#16a34a">Online</strong></div><div class="tsm-detail-row"><span>Estimated activation time</span><strong>1–12 minutes after order acceptance</strong></div><div class="tsm-detail-row"><span>License period</span><strong>1 year</strong></div><div class="tsm-detail-row"><span>License quantity</span><strong>1 PC</strong></div><div class="tsm-detail-row"><span>Supplier requires</span><strong>Email address</strong></div><p class="tsm-detail-note">Orders are not enabled yet because the supplier API is returning a purchase-permission error. The status will show Processing only after an order is actually accepted, and Successful only after supplier confirmation. This details screen will not charge your wallet.</p><button class="btn green" disabled style="width:100%;opacity:.6;cursor:not-allowed">Activation setup in progress</button>`;$("tsmDetailsModal").classList.remove("hidden");$("tsmDetailsModal").setAttribute("aria-hidden","false")}
+function showServerDetails(id){openToolOrderPreview(id,"purchase")}
 function closeServerDetails(){$("tsmDetailsModal").classList.add("hidden");$("tsmDetailsModal").setAttribute("aria-hidden","true")}
 function isSupplierUnavailable(t){const slug=String(t.slug||'').toLowerCase(),name=String(t.name||'').toLowerCase();return slug==='gsm-bazaar-1008'||(name.includes('dzkj')&&name.includes('phonerepair'))}
 function activationToolCard(t){const price=Number(t.price_usdt||0),unavailable=isSupplierUnavailable(t),img=t.icon_url?'<img src="'+esc(t.icon_url)+'" alt="">':'<span class="fallback">⚙️</span>';return '<article class="service"><div class="bigicon">'+img+'</div><h3>'+esc(t.name)+'</h3><p>'+esc(t.description||'Activation tool supplied through FasTech.')+'</p><div class="price">'+money(price)+' USDT</div>'+(unavailable?'<span class="rental-badge time" style="display:inline-flex;margin:0 0 10px">Supplier temporarily unavailable</span><button class="btn outline" type="button" disabled style="opacity:.6;cursor:not-allowed">Ordering unavailable</button>':'<button class="btn blue" type="button" onclick="placeTool(\''+esc(t.id)+'\',\'purchase\')">Buy Now</button>')+'</article>'}
@@ -327,18 +350,39 @@ function renderTools(tools){$("marketplaceTools").innerHTML=tools.filter(t=>t.is
  const rows=(Array.isArray(services)?services:[]).filter(t=>t&&t.id&&Number(t.price_usdt)>0&&(!query||String(t.name||"").toLowerCase().includes(query)||String(t.description||"").toLowerCase().includes(query)));
  el.innerHTML=rows.length?rows.map(t=>{const supplierActive=String(t.supplier_status||"").toLowerCase()==="active";return '<article class="rental-item"><div class="rental-logo"><span class="fallback">IMEI</span></div><div class="rental-info"><div class="rental-name">'+esc(t.name)+'</div><div class="rental-meta"><span class="rental-badge '+(supplierActive?'':'time')+'">'+(supplierActive?'Available':'Supplier confirmation required')+'</span></div><div class="rental-price">'+money(Number(t.price_usdt))+' USDT</div><div class="rental-actions"><button class="btn outline" onclick="showImeiServiceDetails(\''+esc(t.id)+'\')">Details</button>'+(supplierActive?'<button class="btn blue" onclick="placeTool(\''+esc(t.id)+'\',\'purchase\')">Order Service</button>':'<button class="btn outline" type="button" disabled style="opacity:.6;cursor:not-allowed">Ordering unavailable</button>')+'</div></div></article>'}).join(""):'<div class="rental-empty">No priced IMEI services are published yet. Admin must activate the product and set its FasTech selling price.</div>';
 }
-function showImeiServiceDetails(id){const t=(currentData?.imei_services||[]).find(x=>x.id===id)||(currentData?.tools||[]).find(x=>x.id===id);if(!t)return toast("IMEI service details are unavailable.",true);toast(t.name+" • "+money(Number(t.price_usdt))+" USDT");}
+function showImeiServiceDetails(id){openToolOrderPreview(id,"purchase")}
 
-async function placeTool(toolId,type){
- const tool=currentData.tools.find(t=>t.id===toolId);if(!tool)return toast("Tool is no longer available.",true);
- const price=Number(type==="rental"?tool.rental_price_usdt:tool.price_usdt),bal=Number(currentData.usdt_balance||0);
- if(bal<price)return toast(`Insufficient USDT balance. You need ${money(price)}.`,true);
- if(!confirm(`${type==="rental"?"Rent":"Buy"} ${tool.name} for ${money(price)} USDT?`))return;
- toast("Processing order...");
- const {data,error}=await sb.functions.invoke("place-tool-order",{body:{tool_id:toolId,quantity:1,order_type:type}});
- if(error){toast(error.message||"Order failed.",true);return}
- if(data?.error){toast(data.error,true);return}
- toast("Order placed successfully.");await loadDashboardData();
+let pendingToolOrder=null;
+function openToolOrderPreview(toolId,type){
+ const tool=(currentData?.tools||[]).find(t=>t.id===toolId);if(!tool)return toast("Service is no longer available. Refresh the dashboard and try again.",true);
+ const isRental=type==="rental",base=Number(isRental?tool.rental_price_usdt:tool.price_usdt),deal=isRental?promoPrice(tool,"rental",base):{price:base,promotion:null},price=Number(deal.price);
+ if(!Number.isFinite(price)||price<=0)return toast("This service does not have a valid FasTech selling price yet.",true);
+ pendingToolOrder={toolId,type,price};
+ const modal=$("orderPreviewModal"),img=$("orderPreviewImage"),supplierActive=String(tool.supplier_status||"").toLowerCase()==="active";
+ $("orderPreviewTitle").textContent=tool.name||"FasTech Service";
+ $("orderPreviewPrice").textContent=money(price)+" USDT";
+ $("orderPreviewDelivery").textContent=isRental?rentalPeriodLabel(tool.rental_days):"Supplier dependent";
+ $("orderPreviewStatus").textContent=supplierActive?"Online":"Check availability";
+ $("orderPreviewStatus").classList.toggle("online",supplierActive);
+ $("orderPreviewDescription").textContent=(tool.description||"Service supplied through FasTech.")+(isRental?" Rental duration: "+rentalPeriodLabel(tool.rental_days)+".":"");
+ if(tool.icon_url){img.src=tool.icon_url;img.alt=tool.name||"Service image";img.classList.remove("hidden");img.onerror=()=>{img.classList.add("hidden")}}else{img.removeAttribute("src");img.classList.add("hidden")}
+ $("orderPreviewTerms").checked=false;$("orderPreviewSubmit").disabled=false;$("orderPreviewSubmit").textContent="PLACE AN ORDER";
+ modal.classList.remove("hidden");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
+}
+function closeOrderPreview(){const modal=$("orderPreviewModal");if(!modal)return;modal.classList.add("hidden");modal.setAttribute("aria-hidden","true");document.body.style.overflow="";pendingToolOrder=null}
+function placeTool(toolId,type){openToolOrderPreview(toolId,type)}
+async function confirmToolOrder(){
+ if(!pendingToolOrder)return;
+ if(!$("orderPreviewTerms").checked)return toast("Please agree to the terms and conditions before ordering.",true);
+ const {toolId,type,price}=pendingToolOrder,tool=(currentData?.tools||[]).find(t=>t.id===toolId);if(!tool)return toast("Service is no longer available. Refresh and try again.",true);
+ if(Number(currentData.usdt_balance||0)<price)return toast("Insufficient USDT balance. You need "+money(price)+" USDT.",true);
+ const btn=$("orderPreviewSubmit");btn.disabled=true;btn.textContent="PROCESSING ORDER…";
+ try{
+  const {data,error}=await sb.functions.invoke("place-tool-order",{body:{tool_id:toolId,quantity:1,order_type:type}});
+  if(error)throw error;if(data?.error)throw new Error(data.error);
+  closeOrderPreview();toast("Order submitted. Check My Orders for the supplier status.");await loadDashboardData();
+ }catch(e){toast(e?.message||"Order failed. Your wallet should not be charged for a rejected order.",true)}
+ finally{if(!$("orderPreviewModal").classList.contains("hidden")){btn.disabled=false;btn.textContent="PLACE AN ORDER"}}
 }
 async function requestServerRefill(toolId){
  const tool=currentData.tools.find(t=>t.id===toolId);if(!tool)return toast("Server tool is no longer available.",true);
@@ -384,5 +428,20 @@ sb.auth.onAuthStateChange((_event,session)=>{if(session&&!currentUser)enterApp(s
 renderBinancePayQR();
 loadUser();
 </script>
+<div id="orderPreviewModal" class="order-preview-modal hidden" role="dialog" aria-modal="true" aria-labelledby="orderPreviewTitle" aria-hidden="true">
+ <div class="order-preview-backdrop" onclick="closeOrderPreview()"></div>
+ <div class="order-preview-panel"><button class="order-preview-close" type="button" onclick="closeOrderPreview()" aria-label="Close order details">×</button>
+  <img id="orderPreviewImage" class="order-preview-hero hidden" alt="Service image">
+  <div class="order-preview-content"><div class="order-preview-breadcrumb">FasTech › Services › Place an order</div>
+   <h2 id="orderPreviewTitle" class="order-preview-title">Service name</h2>
+   <div class="order-preview-stats"><div class="order-preview-stat"><small>Price</small><strong id="orderPreviewPrice">$0.00 USDT</strong></div><div class="order-preview-stat"><small>Delivery</small><strong id="orderPreviewDelivery" class="delivery">Supplier dependent</strong></div><div class="order-preview-stat"><small>Status</small><strong id="orderPreviewStatus" class="online">Available</strong></div></div>
+   <p id="orderPreviewDescription" style="color:#687382;line-height:1.55;margin:12px 0">Review your service before placing the order.</p>
+   <label class="order-preview-terms"><input id="orderPreviewTerms" type="checkbox"><span>I agree to the terms and conditions and understand that the order will be sent to the supplier and my wallet will be charged only when the order is successfully processed.</span></label>
+   <button id="orderPreviewSubmit" class="order-preview-submit" type="button" onclick="confirmToolOrder()">PLACE AN ORDER</button>
+   <p style="font-size:11px;color:#7a8490;line-height:1.5;margin:12px 0 0">If the supplier rejects the order, FasTech should not treat it as a successful purchase. Check your order history for the final status.</p>
+  </div>
+ </div>
+</div>
+
 <div id="toast" class="toast"></div></body>
 </html>
