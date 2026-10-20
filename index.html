@@ -43,10 +43,11 @@
  .sidebar-header{width:100%}
  .menu-toggle{display:inline-flex;align-items:center;gap:7px}
  .sidebar-menu{display:none;padding-top:16px;gap:16px}
- .sidebar-menu.open{display:flex}
+ .sidebar-menu.open{display:flex;position:fixed;top:calc(env(safe-area-inset-top, 0px) + 72px);left:0;right:0;bottom:0;z-index:5000;overflow-y:auto;overscroll-behavior:contain;background:rgba(5,22,49,.99);padding:18px 16px calc(24px + env(safe-area-inset-bottom, 0px));border-top:1px solid var(--line);box-shadow:0 16px 40px #0009}
  .sidebar-menu nav{display:grid;grid-template-columns:1fr;overflow:visible;gap:5px}
- .sidebar-menu nav button{white-space:normal;text-align:left;width:100%}
- .sidebar-menu .logout{margin-top:0;width:100%}
+ .sidebar-menu nav button{white-space:normal;text-align:left;width:100%;flex-shrink:0}
+ .sidebar-menu .logout{margin-top:auto;width:100%;flex-shrink:0}
+ body:has(.sidebar-menu.open){overflow:hidden}
 }
 
 /* WhatsApp customer support shortcut */
@@ -330,7 +331,7 @@ $("registerTab").onclick=()=>{$("registerTab").classList.add("active");$("loginT
 $("loginForm").onsubmit=async e=>{e.preventDefault();const btn=$("loginForm").querySelector("button[type=submit]");if(btn)btn.disabled=true;message("Signing in...");try{const {data,error}=await sb.auth.signInWithPassword({email:$("loginEmail").value.trim(),password:$("loginPassword").value});if(error){message(error.message,true);return}await enterApp(data.user);if($("authScreen").classList.contains("hidden"))message("");}catch(err){console.error("FasTech login error:",err);message("Login could not finish: "+(err?.message||"Unexpected error")+". Please check your internet connection and try again.",true)}finally{if(btn)btn.disabled=false}};
 $("registerForm").onsubmit=async e=>{e.preventDefault();message("Creating account...");const {data,error}=await sb.auth.signUp({email:$("registerEmail").value,password:$("registerPassword").value,options:{data:{full_name:$("registerName").value}}});if(error)return message(error.message,true);if(data.user&&!data.session)message("Account created. Check your email to confirm the account, then login.");else if(data.user)await enterApp(data.user)};
 $("logout").onclick=async()=>{const btn=$("logout");if(btn){btn.disabled=true;btn.textContent="Signing out..."}try{const {error}=await sb.auth.signOut();if(error)throw error;currentUser=null;currentProfile=null;currentData={tools:[],orders:[],rentals:[],transactions:[],usdt_balance:0};$("appScreen").classList.add("hidden");$("authScreen").classList.remove("hidden");$("loginForm").reset();$("registerForm").reset();$("loginTab").classList.add("active");$("registerTab").classList.remove("active");$("loginForm").classList.remove("hidden");$("registerForm").classList.add("hidden");message("You have signed out. Enter your email and password to log in again.");history.replaceState(null,"",location.pathname+location.search);window.scrollTo({top:0,behavior:"smooth"})}catch(e){toast(e.message||"Could not sign out. Please try again.",true)}finally{if(btn){btn.disabled=false;btn.textContent="↪ Logout"}}};
-$("menuToggle").onclick=()=>{const menu=$("sidebarMenu");const open=menu.classList.toggle("open");$("menuToggle").setAttribute("aria-expanded",String(open));$("menuToggle").setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");$("menuToggle").textContent=open?"✕ Close":"☰ Menu"};document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{showSection(b.dataset.section);if(window.matchMedia("(max-width:760px)").matches){$("sidebarMenu").classList.remove("open");$("menuToggle").setAttribute("aria-expanded","false");$("menuToggle").setAttribute("aria-label","Open navigation menu");$("menuToggle").textContent="☰ Menu"}}));
+$("menuToggle").onclick=()=>{const menu=$("sidebarMenu");const open=menu.classList.toggle("open");$("menuToggle").setAttribute("aria-expanded",String(open));$("menuToggle").setAttribute("aria-label",open?"Close navigation menu":"Open navigation menu");$("menuToggle").textContent=open?"✕ Close":"☰ Menu";document.body.classList.toggle("menu-open",open)};document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{showSection(b.dataset.section);if(window.matchMedia("(max-width:760px)").matches){$("sidebarMenu").classList.remove("open");document.body.classList.remove("menu-open");$("menuToggle").setAttribute("aria-expanded","false");$("menuToggle").setAttribute("aria-label","Open navigation menu");$("menuToggle").textContent="☰ Menu"}}));
 document.querySelectorAll("[data-section-link]").forEach(b=>b.addEventListener("click",()=>showSection(b.dataset.sectionLink)));
 $("mobileMoneyPayBtn").onclick=startMobileMoneyPayment;
 loadMobileMoneyRate();
