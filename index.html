@@ -156,7 +156,7 @@
  </div></section>
 
  <div id="tsmDetailsModal" class="tsm-modal hidden" role="dialog" aria-modal="true" aria-labelledby="tsmDetailsTitle" aria-hidden="true"><div class="tsm-modal-backdrop" onclick="closeServerDetails()"></div><div class="tsm-modal-panel"><button class="tsm-modal-close" onclick="closeServerDetails()" aria-label="Close details">×</button><div id="tsmDetailsContent"><h2 id="tsmDetailsTitle">TSM Tool details</h2></div><button class="btn outline" style="width:100%;margin-top:10px" onclick="closeServerDetails()">Close</button></div></div>
-  <section class="section" id="imei"><div class="card"><h2>IMEI Services</h2><p class="sub">Available IMEI checks and device services. Only services activated and priced by FasTech Admin appear here.</p><div id="imeiServicesList" class="rental-grid"><div class="rental-empty">Loading IMEI services…</div></div></div></section>
+  <section class="section" id="imei"><div class="card"><h2>IMEI Services</h2><p class="sub">Available IMEI checks and device services. Only services activated and priced by FasTech Admin appear here.</p><div class="server-toolbar"><input id="imeiSearch" class="server-search" type="search" placeholder="⌕ Search IMEI services..." aria-label="Search IMEI services"></div><div id="imeiServicesList" class="rental-grid"><div class="rental-empty">Loading IMEI services…</div></div></div></section>
  <section class="section" id="activation"><div class="card"><h2>Activation Tools</h2><p class="sub">Manage your activation tool requests and access.</p><button class="btn blue" onclick="demoAction('Activation request submitted')">Request Activation Tool</button></div></section>
  <section class="section" id="deposit"><div class="card"><h2>Payment / Deposit</h2><p class="sub">Add funds to your FasTech wallet using the available payment options.</p>
 <div class="binance-pay-card">
@@ -204,7 +204,7 @@ function message(text,error=false){$("authMessage").textContent=text;$("authMess
 function toast(text,error=false){const t=$("toast");t.textContent=text;t.style.background=error?"#8e2633":"#0b2550";t.classList.add("show");setTimeout(()=>t.classList.remove("show"),3500)}
 function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function money(v){return "$"+Number(v||0).toFixed(2)}
-function showSection(id){document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));$(id).classList.add("active");document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.section===id));$("pageTitle").textContent=titles[id]||id;window.scrollTo({top:0,behavior:"smooth"})}
+let currentSection="dashboard";history.replaceState({section:"dashboard"},"",location.pathname+location.search+"#dashboard");function showSection(id,trackHistory=true){if(!$(id)||!$(id).classList.contains("section"))return;if(trackHistory&&id!==currentSection)history.pushState({section:id},"","#"+id);document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));$(id).classList.add("active");currentSection=id;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.section===id));$("pageTitle").textContent=titles[id]||id;window.scrollTo({top:0,behavior:"smooth"})}window.addEventListener("popstate",e=>{const target=e.state&&e.state.section;if(target&&$(target)&&$(target).classList.contains("section"))showSection(target,false);else showSection("dashboard",false)});
 function demoAction(msg){toast(msg)}
 function renderBinancePayQR(){
  const state=$("binanceQrState"),wrap=$("binanceQrWrap"),img=$("binanceQrImage");
@@ -279,7 +279,8 @@ function showServerDetails(id){const t=serverToolsCache.find(x=>x.id===id);if(!t
 function closeServerDetails(){$("tsmDetailsModal").classList.add("hidden");$("tsmDetailsModal").setAttribute("aria-hidden","true")}
 function renderTools(tools){$("marketplaceTools").innerHTML=tools.filter(t=>t.is_active!==false&&Number(t.price_usdt)>0).map(t=>toolCard(t,false)).join("")||'<div class="service"><p>No active tools available.</p></div>';renderImeiServices(tools);rentalToolsCache=tools.filter(t=>t.is_active!==false&&Number(t.rental_price_usdt)>0);renderRentalCatalog();serverToolsCache=tools.filter(t=>t.is_active!==false);renderServerCatalog()} function renderImeiServices(services){
  const el=$("imeiServicesList");if(!el)return;
- const rows=(Array.isArray(services)?services:[]).filter(t=>t&&t.id&&Number(t.price_usdt)>0);
+ const query=String($("imeiSearch")?.value||"").trim().toLowerCase();
+ const rows=(Array.isArray(services)?services:[]).filter(t=>t&&t.id&&Number(t.price_usdt)>0&&(!query||String(t.name||"").toLowerCase().includes(query)||String(t.description||"").toLowerCase().includes(query)));
  el.innerHTML=rows.length?rows.map(t=>'<article class="rental-item"><div class="rental-logo"><span class="fallback">IMEI</span></div><div class="rental-info"><div class="rental-name">'+esc(t.name)+'</div><div class="rental-meta"><span class="rental-badge">Available</span></div><div class="rental-price">'+money(Number(t.price_usdt))+' USDT</div><div class="rental-actions"><button class="btn outline" onclick="showImeiServiceDetails(\''+esc(t.id)+'\')">Details</button><button class="btn blue" onclick="placeTool(\''+esc(t.id)+'\',\'purchase\')">Order Service</button></div></div></article>').join(""):'<div class="rental-empty">No IMEI services are published yet. Admin must activate an IMEI supplier product and set a FasTech selling price.</div>';
 }
 function showImeiServiceDetails(id){const t=(currentData?.imei_services||[]).find(x=>x.id===id)||(currentData?.tools||[]).find(x=>x.id===id);if(!t)return toast("IMEI service details are unavailable.",true);toast(t.name+" • "+money(Number(t.price_usdt))+" USDT");}
@@ -334,7 +335,7 @@ document.querySelectorAll("[data-section-link]").forEach(b=>b.addEventListener("
 $("mobileMoneyPayBtn").onclick=startMobileMoneyPayment;
 loadMobileMoneyRate();
 $("ticketBtn").onclick=submitTicket;
-$("rentalSearch").addEventListener("input",e=>{rentalSearchText=e.target.value.trim().toLowerCase();renderRentalCatalog()});$("serverSearch").addEventListener("input",e=>{serverSearchText=e.target.value.trim().toLowerCase();renderServerCatalog()});document.querySelectorAll("[data-server-filter]").forEach(b=>b.addEventListener("click",()=>{serverFilter=b.dataset.serverFilter;document.querySelectorAll("[data-server-filter]").forEach(x=>x.classList.toggle("active",x===b));renderServerCatalog()}));
+$("rentalSearch").addEventListener("input",e=>{rentalSearchText=e.target.value.trim().toLowerCase();renderRentalCatalog()});$("serverSearch").addEventListener("input",e=>{serverSearchText=e.target.value.trim().toLowerCase();renderServerCatalog()});$("imeiSearch").addEventListener("input",()=>renderImeiServices(currentData.imei_services||[]));document.querySelectorAll("[data-server-filter]").forEach(b=>b.addEventListener("click",()=>{serverFilter=b.dataset.serverFilter;document.querySelectorAll("[data-server-filter]").forEach(x=>x.classList.toggle("active",x===b));renderServerCatalog()}));
 sb.auth.onAuthStateChange((_event,session)=>{if(session&&!currentUser)enterApp(session.user)});
 renderBinancePayQR();
 loadUser();
