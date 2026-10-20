@@ -127,7 +127,7 @@
   <div id="serverTools" class="server-grid"><div class="rental-empty">Loading server tools...</div></div>
  </div></section>
  <section class="section" id="refill"><div class="card"><h2>Server Credits Refill</h2><p class="sub">Refill credits for your server service accounts.</p><div class="field"><label>Select Tool</label><select><option>MRT Tool</option><option>Chimera Tool</option><option>UnlockTool</option><option>Sigma Tool</option></select></div><div class="field"><label>Credits Required</label><input type="number" value="100" min="1"></div><button class="btn orange" onclick="demoAction('Refill request submitted')">Request Refill</button></div></section>
- <section class="section" id="imei"><div class="card"><h2>IMEI Services</h2><p class="sub">Request supported IMEI checking and servicing solutions.</p><button class="btn blue" onclick="demoAction('IMEI service request submitted')">Start IMEI Service</button></div></section>
+ <section class="section" id="imei"><div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><div><h2>IMEI Services</h2><p class="sub">Choose an available IMEI service, check the FasTech price and place your order using your USDT wallet.</p></div><button class="btn outline" onclick="refreshImeiServices()">↻ Refresh Services</button></div><div id="imeiServiceStatus" class="message" role="status" aria-live="polite">Loading IMEI services...</div><div id="imeiServicesList" class="services"><div class="service"><p>Loading IMEI services...</p></div></div></div></section>
  <section class="section" id="activation"><div class="card"><h2>Activation Tools</h2><p class="sub">Manage your activation tool requests and access.</p><button class="btn blue" onclick="demoAction('Activation request submitted')">Request Activation Tool</button></div></section>
  <section class="section" id="deposit"><div class="card"><h2>Payment / Deposit</h2><p class="sub">Add USDT to your FasTech wallet. Binance Pay is shown first for quick payment; TRON / TRC20 remains available for blockchain deposits.</p>
 <div class="binance-pay-card">
@@ -244,7 +244,34 @@ async function loadDashboardData(){
  const spent=tx.filter(x=>String(x.type||"").toLowerCase()==="debit").reduce((a,x)=>a+Number(x.amount_usdt||0),0);
  const deposits=tx.filter(x=>["deposit","credit"].includes(String(x.type||"").toLowerCase())).reduce((a,x)=>a+Number(x.amount_usdt||0),0);
  const ws=document.querySelectorAll(".wallet-stats strong");if(ws[1])ws[1].textContent=money(spent);if(ws[2])ws[2].textContent=money(deposits);
- renderTransactions(tx);renderOrders(orders);renderRentals(rentals);renderActiveRentals(rentals);renderTools(tools);await loadCustomerPayments();
+ renderTransactions(tx);renderOrders(orders);renderRentals(rentals);renderActiveRentals(rentals);renderTools(tools);renderImeiServices(currentData.imei_services||[]);await loadCustomerPayments();
+}
+function renderImeiServices(services){
+ const list=$("imeiServicesList"),status=$("imeiServiceStatus");
+ if(!list||!status)return;
+ const rows=(Array.isArray(services)?services:[]).filter(t=>t&&t.id&&Number(t.price_usdt)>0);
+ if(!rows.length){
+  status.textContent="No IMEI services are published yet. Admin must activate an IMEI supplier product and set a FasTech selling price.";
+  list.innerHTML="";
+  return;
+ }
+ status.textContent=rows.length+" IMEI service"+(rows.length===1?"":"s")+" available. Select Order to purchase using your USDT wallet.";
+ list.innerHTML=rows.map(t=>'<article class="service"><div class="bigicon">▦</div><h3>'+esc(t.name)+'</h3><p>'+esc(t.description||"IMEI service provided through FasTech.")+'</p><div class="price">'+money(t.price_usdt)+' USDT</div><button class="btn blue" onclick="placeTool(\''+esc(t.id)+'\',\'purchase\')">Order Service</button></article>').join("");
+}
+async function refreshImeiServices(){
+ const status=$("imeiServiceStatus"),list=$("imeiServicesList");
+ if(status)status.textContent="Refreshing IMEI services...";
+ if(list)list.innerHTML='<div class="service"><p>Loading IMEI services...</p></div>';
+ try{
+  const {data,error}=await sb.rpc("get_customer_usdt_dashboard");
+  if(error)throw error;
+  currentData=data||currentData;
+  renderImeiServices(currentData.imei_services||[]);
+ }catch(e){
+  if(status)status.textContent="Could not refresh IMEI services. Please try again.";
+  if(list)list.innerHTML="";
+  toast(e.message||"Could not refresh IMEI services.",true);
+ }
 }
 function renderTransactions(rows){
  const empty='<tr><td colspan="5" style="color:#9ab7d8">No transactions yet.</td></tr>';
