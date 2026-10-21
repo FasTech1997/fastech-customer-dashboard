@@ -275,7 +275,7 @@ async function enterApp(user){
  currentProfile=profile||{};
  updateTimeGreeting();
  const name=currentProfile.full_name||user.email?.split("@")[0]||"Customer";
- $("sideName").textContent=name;$("topName").textContent=name;$("welcomeName").textContent=name;$("sideEmail").textContent=user.email||"Customer account";$("profileInput").value=name;
+ $("sideName").textContent=name;$("topName").textContent=name;const welcomeNameEl=$("welcomeName");if(welcomeNameEl)welcomeNameEl.textContent=name;$("sideEmail").textContent=user.email||"Customer account";const profileInputEl=$("profileInput");if(profileInputEl)profileInputEl.value=name;
  $("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");try{await loadDashboardData()}catch(err){console.error("FasTech dashboard load error:",err);toast("Signed in, but dashboard data could not load: "+(err?.message||"Please refresh."),true)}finally{enteringUserId=null}
 }
 async function loadDashboardData(){
