@@ -353,7 +353,7 @@ function startPromoSlider(){
  if(promoSlideTimer)clearInterval(promoSlideTimer);
  const host=$("promotionsStrip");if(!host)return;
  const count=host.querySelectorAll(".promo-card").length;
- if(count>1)promoSlideTimer=setInterval(()=>showPromoSlide(promoSlideIndex+1),52000);
+ if(count>1)promoSlideTimer=setInterval(()=>showPromoSlide(promoSlideIndex+1),10000);
 }
 async function loadCustomerPromotions(){
  const host=$("promotionsStrip");if(!host||!currentUser)return;
