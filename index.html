@@ -59,14 +59,16 @@
 
 .tsm-product-card{padding:0;overflow:hidden}.tsm-card-open{display:flex;align-items:center;gap:15px;width:100%;height:100%;padding:16px;text-align:left;background:transparent;border:0;color:inherit;cursor:pointer}.tsm-card-open:hover{background:#103664}.tsm-product-card .server-logo{flex:0 0 76px;width:76px;height:76px;border-radius:14px;background:linear-gradient(145deg,#0878d8,#173a8b);display:grid;place-items:center;color:white;font-size:23px;font-weight:900;overflow:hidden}.tsm-product-card .server-logo img{width:100%;height:100%;object-fit:contain}.tsm-view-hint{display:inline-block;margin-top:10px;color:#63c9ff;font-size:12px;font-weight:700}.tsm-modal{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:18px}.tsm-modal.hidden{display:none!important}.tsm-modal-backdrop{position:absolute;inset:0;background:#020916d9;backdrop-filter:blur(4px)}.tsm-modal-panel{position:relative;width:min(520px,100%);max-height:90vh;overflow:auto;background:#0b2550;border:1px solid #1b4d86;border-radius:18px;padding:24px;box-shadow:0 24px 80px #0008}.tsm-modal-close{position:absolute;right:14px;top:10px;border:0;background:#173b68;color:white;border-radius:8px;font-size:24px;width:36px;height:36px;cursor:pointer}.tsm-detail-head{display:flex;gap:15px;align-items:center;padding:12px 28px 18px 0}.tsm-detail-head img,.tsm-detail-logo{width:84px;height:84px;flex:0 0 84px;object-fit:contain;border-radius:16px;background:linear-gradient(145deg,#0878d8,#173a8b);display:grid;place-items:center;color:white;font-size:23px;font-weight:900}.tsm-detail-head h2{font-size:17px;margin:0 0 7px}.tsm-detail-head p{color:#9ab7d8;font-size:13px;margin:0 0 8px}.tsm-detail-head strong{font-size:22px;color:#16d69b}.tsm-detail-row{display:flex;justify-content:space-between;gap:15px;border-top:1px solid #1b4d86;padding:12px 0;font-size:13px}.tsm-detail-row span{color:#9ab7d8}.tsm-detail-note{background:#102f5b;border:1px solid #1b4d86;border-radius:10px;padding:13px;color:#c7d9ed;font-size:13px;line-height:1.6;margin:14px 0}.server-toolbar{margin-bottom:14px}@media(max-width:600px){.tsm-modal-panel{padding:20px}.tsm-detail-head img,.tsm-detail-logo{width:68px;height:68px;flex-basis:68px}}
 
-.promo-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:14px;margin:0 0 20px}
-.promo-card{border:1px solid #245b96;background:linear-gradient(135deg,#102f5b,#0a2143);border-radius:16px;padding:16px;color:#eef7ff;overflow:hidden}
-.promo-card img{width:100%;max-height:145px;object-fit:cover;border-radius:10px;margin-bottom:10px}
-.promo-tag{display:inline-block;background:#ffda66;color:#3a2600;font-weight:900;font-size:11px;border-radius:20px;padding:5px 9px;margin-bottom:8px}
-.promo-card h3{margin:2px 0 7px;color:white}.promo-card p{color:#c7d9ed;font-size:13px;line-height:1.5;margin:6px 0 12px}
-.promo-price{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin:9px 0 12px}.promo-old{text-decoration:line-through;color:#9ab7d8}.promo-new{font-size:19px;font-weight:900;color:#16d69b}
-.promo-empty{display:none}
-@media(max-width:600px){.promo-grid{grid-template-columns:1fr}.promo-card img{max-height:190px}}
+.promo-grid{position:relative;display:block;margin:0 0 20px;min-height:220px}
+.promo-card{position:relative;display:none;min-height:220px;border:1px solid #2672b7;background:radial-gradient(circle at 85% 35%,#176cc5 0,transparent 30%),linear-gradient(120deg,#06172f,#0b3670 58%,#071a37);border-radius:18px;padding:clamp(20px,4vw,34px);color:#eef7ff;overflow:hidden;box-shadow:0 12px 30px #0003}
+.promo-card.active{display:flex;flex-direction:column;justify-content:center;animation:promoFade .45s ease}
+.promo-card:after{content:"FT";position:absolute;right:5%;top:50%;transform:translateY(-50%) rotate(-12deg);font-size:clamp(100px,20vw,190px);font-weight:1000;letter-spacing:-12px;color:#ffffff0b;pointer-events:none}
+.promo-card img{width:100%;max-height:125px;object-fit:contain;border-radius:10px;margin:0 0 12px;align-self:flex-start;max-width:190px;position:relative;z-index:1}
+.promo-tag{display:inline-block;align-self:flex-start;background:#ffda66;color:#3a2600;font-weight:900;font-size:11px;border-radius:20px;padding:6px 10px;margin-bottom:10px;position:relative;z-index:1}
+.promo-card h3{font-size:clamp(21px,3vw,31px);max-width:78%;margin:2px 0 7px;color:white;position:relative;z-index:1}.promo-card p{max-width:75%;color:#d5e8ff;font-size:14px;line-height:1.6;margin:6px 0 12px;position:relative;z-index:1}
+.promo-price{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:9px 0 12px;position:relative;z-index:1}.promo-old{text-decoration:line-through;color:#a9c3e3}.promo-new{font-size:clamp(22px,3vw,30px);font-weight:900;color:#ffda66}
+.promo-card .btn{align-self:flex-start;position:relative;z-index:1}.promo-controls{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:10px}.promo-arrow,.promo-dot{border:1px solid #285987;background:#0c2b50;color:#fff;cursor:pointer}.promo-arrow{border-radius:50%;width:34px;height:34px;font-size:18px}.promo-dot{width:8px;height:8px;border-radius:50%;padding:0}.promo-dot.active{width:22px;border-radius:9px;background:#ffda66;border-color:#ffda66}.promo-empty{display:none}@keyframes promoFade{from{opacity:.35;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:600px){.promo-grid{min-height:260px}.promo-card{min-height:260px;padding:20px}.promo-card h3,.promo-card p{max-width:100%}.promo-card img{max-height:100px}.promo-card:after{right:-2%;top:65%;font-size:100px}}
 
 /* Shared supplier-style order details for Rental, Server and IMEI services */
 .order-preview-modal{position:fixed;inset:0;z-index:10001;display:grid;place-items:center;padding:16px}
@@ -144,7 +146,6 @@
  <div class="heading"><div><h1 id="pageTitle">Dashboard</h1><p>Fast, secure and reliable online tools services.</p></div><span class="tag">CUSTOMER AREA</span></div>
 
  <section class="section active" id="dashboard">
-  <div class="hero"><h2>Welcome back,<strong id="welcomeName">Customer</strong></h2><p>Your FasTech account is ready. Manage your services, make payments, rent tools and access the best mobile phone solutions.</p><span class="verified">✓ Verified Customer</span></div>
   <div id="promotionsStrip" class="promo-grid" aria-live="polite"></div>
   <div class="grid">
    <div class="card stat"><div class="icon">▣</div><div><small>USDT Balance</small><strong id="balance">$0.00 <span class="up">↗</span></strong></div></div>
@@ -305,21 +306,36 @@ function activePromotionFor(toolId,mode){
  return activePromotions.filter(p=>p.promotion_type==="discount"&&p.tool_id===toolId&&p.discount_price_usdt!==null&&p.discount_price_usdt!==""&&new Date(p.starts_at).getTime()<=now&&(!p.ends_at||new Date(p.ends_at).getTime()>now)&&(p.discount_mode==="both"||p.discount_mode===(mode==="rental"?"rental":"activation"))).sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0]||null;
 }
 function promoPrice(tool,mode,base){const p=activePromotionFor(tool.id,mode);const d=p?Number(p.discount_price_usdt):NaN;return p&&Number.isFinite(d)&&d>=0&&d<base?{price:d,promotion:p}: {price:base,promotion:null};}
+let promoSlideIndex=0,promoSlideTimer=null;
+function showPromoSlide(index){
+ const host=$("promotionsStrip");if(!host)return;
+ const slides=[...host.querySelectorAll(".promo-card")];if(!slides.length)return;
+ promoSlideIndex=(index+slides.length)%slides.length;
+ slides.forEach((el,i)=>el.classList.toggle("active",i===promoSlideIndex));
+ host.querySelectorAll(".promo-dot").forEach((el,i)=>el.classList.toggle("active",i===promoSlideIndex));
+}
+function startPromoSlider(){
+ if(promoSlideTimer)clearInterval(promoSlideTimer);
+ const host=$("promotionsStrip");if(!host)return;
+ const count=host.querySelectorAll(".promo-card").length;
+ if(count>1)promoSlideTimer=setInterval(()=>showPromoSlide(promoSlideIndex+1),5200);
+}
 async function loadCustomerPromotions(){
  const host=$("promotionsStrip");if(!host||!currentUser)return;
  const {data,error}=await sb.from("promotions").select("*").eq("is_published",true).order("created_at",{ascending:false}).limit(50);
  if(error){console.warn("Promotions unavailable",error.message);return}
  const now=Date.now();activePromotions=(data||[]).filter(p=>new Date(p.starts_at).getTime()<=now&&(!p.ends_at||new Date(p.ends_at).getTime()>now));
  const cards=activePromotions.filter(p=>p.promotion_type!=="discount"||!p.tool_id||p.discount_price_usdt!==null);
+ if(!cards.length){host.innerHTML='<article class="promo-card active"><span class="promo-tag">FASTech • CUSTOMER OFFERS</span><h3>Discover FasTech Services</h3><p>Special offers, tool rentals and mobile servicing solutions — all in one place.</p><button class="btn blue" onclick="showSection(\'marketplace\')">Explore Tools →</button></article>';return}
  host.innerHTML=cards.map(p=>{
  const tool=(currentData.tools||[]).find(t=>t.id===p.tool_id);
- const disc=p.promotion_type==="discount"&&tool;
  const base=tool?Number(p.discount_mode==="rental"?tool.rental_price_usdt:tool.price_usdt):Number(p.original_price_usdt||0);
  const newPrice=Number(p.discount_price_usdt);
- const validDiscount=disc&&Number.isFinite(newPrice)&&newPrice>=0&&newPrice<base;
+ const validDiscount=p.promotion_type==="discount"&&tool&&Number.isFinite(newPrice)&&newPrice>=0&&newPrice<base;
  const tag=p.promotion_type==="discount"?"🔥 SPECIAL DISCOUNT":p.promotion_type==="new_product"?"✨ NEW PRODUCT":"📣 ANNOUNCEMENT";
- return '<article class="promo-card">'+(p.image_url?'<img src="'+esc(p.image_url)+'" alt="'+esc(p.title)+'" loading="lazy" onerror="this.style.display=\'none\'">':'')+'<span class="promo-tag">'+tag+'</span><h3>'+esc(p.title)+'</h3><p>'+esc(p.message||"")+'</p>'+(validDiscount?'<div class="promo-price"><span class="promo-old">'+money(base)+'</span><span class="promo-new">'+money(newPrice)+' USDT</span></div>':'')+(tool?'<button class="btn blue" onclick="showSection(\''+(p.discount_mode==="rental"?"rental":"marketplace")+'\')">'+(p.discount_mode==="rental"?"View Rental":"View Tool")+' →</button>':'')+'</article>';
- }).join("");
+ return '<article class="promo-card">'+(p.image_url?'<img src="'+esc(p.image_url)+'" alt="'+esc(p.title)+'" loading="lazy" onerror="this.style.display=\'none\'">':'')+'<span class="promo-tag">'+tag+'</span><h3>'+esc(p.title)+'</h3><p>'+esc(p.message||"")+'</p>'+(validDiscount?'<div class="promo-price"><span class="promo-old">'+money(Number(p.original_price_usdt||base))+'</span><span class="promo-new">'+money(newPrice)+' USDT</span></div>':'')+(tool?'<button class="btn blue" onclick="showSection(\''+(p.discount_mode==="rental"?"rental":"marketplace")+'\')">'+(p.discount_mode==="rental"?"View Rental":"View Tool")+' →</button>':'')+'</article>';
+ }).join("")+'<div class="promo-controls"><button class="promo-arrow" aria-label="Previous promotion" onclick="showPromoSlide(promoSlideIndex-1)">‹</button>'+cards.map((_,i)=>'<button class="promo-dot '+(i===0?'active':'')+'" aria-label="Show promotion '+(i+1)+'" onclick="showPromoSlide('+i+')"></button>').join("")+'<button class="promo-arrow" aria-label="Next promotion" onclick="showPromoSlide(promoSlideIndex+1)">›</button></div>';
+ showPromoSlide(0);startPromoSlider();
 }
 function toolCard(t,rental=false){const basePrice=Number(rental?t.rental_price_usdt:t.price_usdt);const deal=promoPrice(t,rental?"rental":"activation",basePrice);const price=deal.price;const priceHtml=deal.promotion?`<span style="text-decoration:line-through;color:#9ab7d8;margin-right:7px">${money(basePrice)}</span><span style="color:#ffda66">${money(price)}</span><small style="display:block;color:#ffda66">Limited-time discount</small>`:`${money(price)}`;const img=t.icon_url?`<img src="${esc(t.icon_url)}" alt="">`:'<span class="fallback">🛠</span>';return `<div class="service"><div class="bigicon">${img}</div><h3>${esc(t.name)}</h3><p>${esc(t.description||"Professional FasTech tool.")}</p><div style="font-size:16px;font-weight:800;color:${rental?"#7258ff":"#16d69b"};margin:7px 0 12px">${priceHtml} USDT ${rental&&t.rental_days?`/ ${t.rental_days} day${t.rental_days>1?"s":""}`:""}</div><button class="btn ${rental?"purple":"blue"}" onclick="placeTool('${t.id}','${rental?"rental":"purchase"}')">${rental?"Rent Now":"Buy Now"}</button></div>`}
 let rentalToolsCache=[];let rentalFilter='all';let rentalSearchText='';
