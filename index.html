@@ -445,12 +445,33 @@ function openToolOrderPreview(toolId,type){
  $("orderPreviewDescription").textContent=(tool.description||"Service supplied through FasTech.")+(isRental?" Rental duration: "+rentalPeriodLabel(tool.rental_days)+".":"");
  const inputBox=$("orderCustomerInputs");
  if(inputBox){
-  const descriptor=(String(tool.name||"")+" "+String(tool.description||"")).toLowerCase();
-  let field="email",label="Enter Email",placeholder="Email",inputType="email",autocomplete="email";
-  if(descriptor.includes("imei")||descriptor.includes("serial number")){field="imei_or_serial";label="Enter IMEI / Serial Number";placeholder="IMEI or Serial Number";inputType="text";autocomplete="off"}
-  else if(descriptor.includes("username")||descriptor.includes("account id")||descriptor.includes("user id")){field="username";label="Enter Username / Account ID";placeholder="Username or Account ID";inputType="text";autocomplete="username"}
-  inputBox.innerHTML='<h3>Service Details</h3><label>'+label+'<input id="orderCustomerValue" type="'+inputType+'" autocomplete="'+autocomplete+'" placeholder="'+placeholder+'" required></label>';
-  inputBox.dataset.field=field;inputBox.classList.toggle("hidden",isRental);
+  const fields=Array.isArray(tool.customer_input_fields)?tool.customer_input_fields:[];
+  if(isRental){
+   inputBox.innerHTML='<h3>Service Details</h3><p class="sub">No extra information is needed for this rental request.</p>';
+   inputBox.dataset.fields="[]";inputBox.classList.add("hidden");
+  }else if(fields.length){
+   inputBox.innerHTML='<h3>Required Information (as provided by supplier)</h3>'+fields.map((f,i)=>{
+    const key=String(f.key||f.name||("field_"+i)),label=String(f.name||"Service detail"),desc=String(f.description||"");
+    const type=String(f.type||"text").toLowerCase();
+    const required=f.required!==false;
+    let control='';
+    if(type==="select"&&f.options){
+      const opts=String(f.options).split(/[,;\\n]/).map(v=>v.trim()).filter(Boolean);
+      control='<select data-customer-key="'+esc(key)+'" '+(required?'required':'')+'><option value="">Choose '+esc(label)+'</option>'+opts.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select>';
+    }else{
+      const htmlType=["email","number","text","url","tel"].includes(type)?type:"text";
+      control='<input data-customer-key="'+esc(key)+'" type="'+htmlType+'" '+(required?'required':'')+' placeholder="Enter '+esc(label)+'" autocomplete="off">';
+    }
+    return '<label class="field">'+esc(label)+(required?' *':'')+control+(desc?'<small>'+esc(desc)+'</small>':'')+'</label>';
+   }).join('');
+   inputBox.dataset.fields="supplier";inputBox.classList.remove("hidden");
+  }else if(tool.supplier_product_linked){
+   inputBox.innerHTML='<h3>Service Details</h3><p class="sub">Supplier has not provided the required fields for this service. Please contact FasTech support so this service can be configured before ordering. Your wallet will not be charged.</p>';
+   inputBox.dataset.fields="missing";inputBox.classList.remove("hidden");
+  }else{
+   inputBox.innerHTML='<h3>Service Details</h3><label class="field">Email Address *<input data-customer-key="email" type="email" autocomplete="email" placeholder="Enter your email address" required></label>';
+   inputBox.dataset.fields="local";inputBox.classList.remove("hidden");
+  }
  }
  if(tool.icon_url){img.src=tool.icon_url;img.alt=tool.name||"Service image";img.classList.remove("hidden");img.onerror=()=>{img.classList.add("hidden")}}else{img.removeAttribute("src");img.classList.add("hidden")}
  $("orderPreviewTerms").checked=false;$("orderPreviewSubmit").disabled=false;$("orderPreviewSubmit").textContent="PLACE AN ORDER";
@@ -462,8 +483,17 @@ async function confirmToolOrder(){
  if(!pendingToolOrder)return;
  if(!$("orderPreviewTerms").checked)return toast("Please agree to the terms and conditions before ordering.",true);
  const {toolId,type,price}=pendingToolOrder,tool=(currentData?.tools||[]).find(t=>t.id===toolId);if(!tool)return toast("Service is no longer available. Refresh and try again.",true);
- const customerFields={};const inputBox=$("orderCustomerInputs");const customerValue=$("orderCustomerValue")?.value.trim()||"";if(type!=="rental"&&inputBox?.dataset.field&&customerValue)customerFields[inputBox.dataset.field]=customerValue;
- if(type!=="rental"&&!customerValue)return toast("Please enter the service detail requested in this form.",true);
+ const customerFields={};const inputBox=$("orderCustomerInputs");
+ if(type!=="rental"){
+  if(inputBox?.dataset.fields==="missing")return toast("This service is not configured for ordering yet. Please contact FasTech support; your wallet has not been charged.",true);
+  const controls=inputBox?.querySelectorAll("[data-customer-key]")||[];
+  for(const control of controls){
+   const key=control.dataset.customerKey,value=String(control.value||"").trim();
+   if(control.required&&!value)return toast("Please fill in: "+key,true);
+   if(value)customerFields[key]=value;
+  }
+  if(inputBox?.dataset.fields==="supplier"&&controls.length===0)return toast("Required service fields are missing. Please contact FasTech support.",true);
+ }
  if(Number(currentData.usdt_balance||0)<price)return toast("Insufficient USDT balance. You need "+money(price)+" USDT.",true);
  const btn=$("orderPreviewSubmit");btn.disabled=true;btn.textContent="PROCESSING ORDER…";
  try{
