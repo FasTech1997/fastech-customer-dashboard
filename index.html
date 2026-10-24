@@ -439,7 +439,7 @@ function openToolOrderPreview(toolId,type){
  const modal=$("orderPreviewModal"),img=$("orderPreviewImage"),supplierActive=String(tool.supplier_status||"").toLowerCase()==="active";
  $("orderPreviewTitle").textContent=tool.name||"FasTech Service";
  $("orderPreviewPrice").textContent=money(price)+" USDT";
- $("orderPreviewDelivery").textContent=isRental?rentalPeriodLabel(tool.rental_days):"Supplier dependent";
+ $("orderPreviewDelivery").textContent=isRental?"Instant":"Supplier dependent";
  $("orderPreviewStatus").textContent=supplierActive?"Online":"Check availability";
  $("orderPreviewStatus").classList.toggle("online",supplierActive);
  $("orderPreviewDescription").textContent=(tool.description||"Service supplied through FasTech.")+(isRental?" Rental duration: "+rentalPeriodLabel(tool.rental_days)+".":"");
