@@ -443,7 +443,15 @@ function openToolOrderPreview(toolId,type){
  $("orderPreviewStatus").textContent=supplierActive?"Online":"Check availability";
  $("orderPreviewStatus").classList.toggle("online",supplierActive);
  $("orderPreviewDescription").textContent=(tool.description||"Service supplied through FasTech.")+(isRental?" Rental duration: "+rentalPeriodLabel(tool.rental_days)+".":"");
- const inputBox=$("orderCustomerInputs");if(inputBox)inputBox.classList.toggle("hidden",isRental);["orderCustomerEmail","orderCustomerUsername","orderCustomerImei","orderCustomerNotes"].forEach(id=>{const e=$(id);if(e)e.value=""});
+ const inputBox=$("orderCustomerInputs");
+ if(inputBox){
+  const descriptor=(String(tool.name||"")+" "+String(tool.description||"")).toLowerCase();
+  let field="email",label="Enter Email",placeholder="Email",inputType="email",autocomplete="email";
+  if(descriptor.includes("imei")||descriptor.includes("serial number")){field="imei_or_serial";label="Enter IMEI / Serial Number";placeholder="IMEI or Serial Number";inputType="text";autocomplete="off"}
+  else if(descriptor.includes("username")||descriptor.includes("account id")||descriptor.includes("user id")){field="username";label="Enter Username / Account ID";placeholder="Username or Account ID";inputType="text";autocomplete="username"}
+  inputBox.innerHTML='<h3>Service Details</h3><label>'+label+'<input id="orderCustomerValue" type="'+inputType+'" autocomplete="'+autocomplete+'" placeholder="'+placeholder+'" required></label>';
+  inputBox.dataset.field=field;inputBox.classList.toggle("hidden",isRental);
+ }
  if(tool.icon_url){img.src=tool.icon_url;img.alt=tool.name||"Service image";img.classList.remove("hidden");img.onerror=()=>{img.classList.add("hidden")}}else{img.removeAttribute("src");img.classList.add("hidden")}
  $("orderPreviewTerms").checked=false;$("orderPreviewSubmit").disabled=false;$("orderPreviewSubmit").textContent="PLACE AN ORDER";
  modal.classList.remove("hidden");modal.setAttribute("aria-hidden","false");document.body.style.overflow="hidden";
@@ -454,8 +462,8 @@ async function confirmToolOrder(){
  if(!pendingToolOrder)return;
  if(!$("orderPreviewTerms").checked)return toast("Please agree to the terms and conditions before ordering.",true);
  const {toolId,type,price}=pendingToolOrder,tool=(currentData?.tools||[]).find(t=>t.id===toolId);if(!tool)return toast("Service is no longer available. Refresh and try again.",true);
- const customerFields={email:$("orderCustomerEmail")?.value.trim()||"",username:$("orderCustomerUsername")?.value.trim()||"",imei_or_serial:$("orderCustomerImei")?.value.trim()||"",additional_notes:$("orderCustomerNotes")?.value.trim()||""};
- if(type!=="rental"&&!Object.values(customerFields).some(Boolean))return toast("Enter the account, email, IMEI/serial, or other details required for this service.",true);
+ const customerFields={};const inputBox=$("orderCustomerInputs");const customerValue=$("orderCustomerValue")?.value.trim()||"";if(type!=="rental"&&inputBox?.dataset.field&&customerValue)customerFields[inputBox.dataset.field]=customerValue;
+ if(type!=="rental"&&!customerValue)return toast("Please enter the service detail requested in this form.",true);
  if(Number(currentData.usdt_balance||0)<price)return toast("Insufficient USDT balance. You need "+money(price)+" USDT.",true);
  const btn=$("orderPreviewSubmit");btn.disabled=true;btn.textContent="PROCESSING ORDER…";
  try{
@@ -517,7 +525,7 @@ loadUser();
    <h2 id="orderPreviewTitle" class="order-preview-title">Service name</h2>
    <div class="order-preview-stats"><div class="order-preview-stat"><small>Price</small><strong id="orderPreviewPrice">$0.00 USDT</strong></div><div class="order-preview-stat"><small>Delivery</small><strong id="orderPreviewDelivery" class="delivery">Supplier dependent</strong></div><div class="order-preview-stat"><small>Status</small><strong id="orderPreviewStatus" class="online">Available</strong></div></div>
    <p id="orderPreviewDescription" style="color:#687382;line-height:1.55;margin:12px 0">Review your service before placing the order.</p>
-   <div id="orderCustomerInputs" class="order-customer-inputs hidden"><h3>Activation / Service Details</h3><p>Fill in the details required by your selected service. Only provide the information needed for this tool.</p><label>Email (if required)<input id="orderCustomerEmail" type="email" autocomplete="email" placeholder="Enter email address"></label><label>Username / Account ID<input id="orderCustomerUsername" type="text" autocomplete="username" placeholder="Enter username or account ID"></label><label>IMEI / Serial Number<input id="orderCustomerImei" type="text" placeholder="Enter IMEI or serial number"></label><label>Additional details (optional)<textarea id="orderCustomerNotes" rows="2" placeholder="Other information required by the supplier"></textarea></label></div>
+   <div id="orderCustomerInputs" class="order-customer-inputs hidden" data-field="email"></div>
     <label class="order-preview-terms"><input id="orderPreviewTerms" type="checkbox"><span>I agree to the terms and conditions and understand that the order will be sent to the supplier and my wallet will be charged only when the order is successfully processed.</span></label>
    <button id="orderPreviewSubmit" class="order-preview-submit" type="button" onclick="confirmToolOrder()">PLACE AN ORDER</button>
    <p style="font-size:11px;color:#7a8490;line-height:1.5;margin:12px 0 0">If the supplier rejects the order, FasTech should not treat it as a successful purchase. Check your order history for the final status.</p>
