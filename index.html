@@ -465,8 +465,8 @@ function openToolOrderPreview(toolId,type){
     return '<label class="field">'+esc(label)+(required?' *':'')+control+(desc?'<small>'+esc(desc)+'</small>':'')+'</label>';
    }).join('');
    inputBox.dataset.fields="supplier";inputBox.classList.remove("hidden");
-  }else if(tool.supplier_product_linked){
-   inputBox.innerHTML='<h3>Service Details</h3><p class="sub">Supplier has not provided the required fields for this service. Please contact FasTech support so this service can be configured before ordering. Your wallet will not be charged.</p>';
+  }else if(tool.supplier_product_linked||tool.supplier_group_type||tool.supplier_service_type){
+   inputBox.innerHTML='<h3>Service Details</h3><p class="sub">The supplier has not provided the required fields for this service in the saved service list. Refreshing the supplier service details is needed before ordering, so we do not ask for the wrong information. Your wallet will not be charged.</p>';
    inputBox.dataset.fields="missing";inputBox.classList.remove("hidden");
   }else{
    inputBox.innerHTML='<h3>Service Details</h3><label class="field">Email Address *<input data-customer-key="email" type="email" autocomplete="email" placeholder="Enter your email address" required></label>';
