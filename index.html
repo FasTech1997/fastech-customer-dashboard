@@ -499,7 +499,7 @@ async function confirmToolOrder(){
  try{
   const {data,error}=await sb.functions.invoke("place-tool-order",{body:{tool_id:toolId,quantity:1,order_type:type,customer_fields:type==="rental"?{}:customerFields}});
   if(error)throw error;if(data?.error)throw new Error(data.error);
-  closeOrderPreview();await loadDashboardData();showSection("orders");toast("Your order was successful! It has been added to Order History. Supplier fulfillment may still be processing.");
+  closeOrderPreview();await loadDashboardData();showSection("orders");toast(data?.fulfillment==="queued_pending_supplier"?"Order placed and queued. Waiting for supplier processing.":"Order recorded in Order History. Supplier processing may still be pending.");
  }catch(e){toast(e?.message||"Order failed. Your wallet should not be charged for a rejected order.",true)}
  finally{if(!$("orderPreviewModal").classList.contains("hidden")){btn.disabled=false;btn.textContent="PLACE AN ORDER"}}
 }
