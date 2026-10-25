@@ -360,12 +360,40 @@ async function syncSupplierOrderStatuses(rows){
   const items=Array.isArray(o.items)?o.items:[];
   const linked=items.some(it=>(currentData.tools||[]).some(t=>t.id===it.tool_id&&(t.supplier_product_id||t.supplier_status||t.supplier_group_type||t.supplier_service_type)));
   if(!linked){o.supplier_status=null;return}
-  if(["refunded","cancelled","failed"].includes(String(o.status||"").toLowerCase())){o.supplier_status="failed";o.supplier_label="Rejected — wallet refunded";o.supplier_message="Supplier order failed. Check your wallet transaction history for the automatic refund.";return}
+  if(["refunded","cancelled","failed"].includes(String(o.status||"").toLowerCase())){o.supplier_status="failed";o.supplier_label="Rejected — wallet refund status";o.supplier_message="Supplier order failed. Check your wallet transaction history for the refund.";return}
   try{
-   const {data,error}=await sb.functions.invoke("gsm-bazaar-dispatch-order",{body:{action:"refresh",order_id:o.id}});
-   if(!error&&data?.ok){o.supplier_status=String(data.status||"pending").toLowerCase();o.supplier_label=String(data.label||"Waiting for supplier");o.supplier_message=String(data.message||"");o.supplier_reference=data.supplier_reference||null;}
-   else{o.supplier_status="pending";o.supplier_label="Waiting for supplier";o.supplier_message=error?.message||data?.error||"Supplier status has not been returned yet.";o.supplier_reference=null;}
-  }catch(e){o.supplier_status="pending";o.supplier_label="Waiting for supplier";o.supplier_message="Supplier status has not been returned yet.";o.supplier_reference=null;}
+   let data=null,error=null;
+   // Paid orders are dispatched immediately when the customer dashboard loads.
+   // The Edge Function blocks duplicate sends once a supplier reference or dispatch marker exists.
+   if(String(o.status||"").toLowerCase()==="paid"){
+    const sent=await sb.functions.invoke("gsm-bazaar-dispatch-order",{body:{action:"dispatch",order_id:o.id}});
+    data=sent.data;error=sent.error;
+   }
+   // Poll when a supplier reference exists, or when dispatch reports that this order was already submitted.
+   const shouldRefresh=Boolean(data?.supplier_reference||data?.supplier_order?.external_order_id||/already exists|already submitted|duplicate dispatch blocked/i.test(String(data?.error||"")));
+   if(!error&&data?.ok&&shouldRefresh){
+    const refreshed=await sb.functions.invoke("gsm-bazaar-dispatch-order",{body:{action:"refresh",order_id:o.id}});
+    if(!refreshed.error&&refreshed.data?.ok)data=refreshed.data;
+   }else if((error||!data?.ok)&&String(o.status||"").toLowerCase()==="paid"&&shouldRefresh){
+    const refreshed=await sb.functions.invoke("gsm-bazaar-dispatch-order",{body:{action:"refresh",order_id:o.id}});
+    if(!refreshed.error&&refreshed.data?.ok){data=refreshed.data;error=null;}
+   }
+   if(!data||error){
+    o.supplier_status="pending";o.supplier_label="Supplier confirmation pending";
+    o.supplier_message=error?.message||data?.error||"Supplier has not confirmed the order yet.";
+    o.supplier_reference=o.supplier_reference||null;return;
+   }
+   o.supplier_status=String(data.status||"pending").toLowerCase();
+   o.supplier_label=String(data.label||"Waiting for supplier");
+   o.supplier_message=String(data.message||data.error||"");
+   o.supplier_reference=data.supplier_reference||data.supplier_order?.external_order_id||o.supplier_reference||null;
+   const details=data.supplier_details||data.supplier_order?.activation_data?.supplier_details||data.supplier_order?.activation_data?.supplier_response||null;
+   if(details)o.supplier_details=details;
+  }catch(e){
+   o.supplier_status="pending";o.supplier_label="Supplier confirmation pending";
+   o.supplier_message=e?.message||"Supplier status has not been returned yet.";
+   o.supplier_reference=o.supplier_reference||null;
+  }
  }));
 }
 function historyDisplayStatus(o){if(o?.supplier_status)return o.supplier_status;const s=String(o?.status||"pending").toLowerCase();if(["failed","cancelled","refunded","rejected"].includes(s))return s;if(s==="paid")return "pending";if(["completed","success","active"].includes(s))return "successful";return s}function historyStatusClass(s){s=String(s||"pending").toLowerCase();return ["paid","processing","submitted","pending","active","completed","success","successful"].includes(s)?"confirmed":["failed","cancelled","refunded","rejected"].includes(s)?"failed":"pending"}
