@@ -428,7 +428,7 @@ function viewHistoryDetails(kind,index){
   const items=Array.isArray(o.items)?o.items:[],item=items[0]||{};title=items.map(x=>x.item_name||"Tool order").join(", ")||"Tool order";
   body=detailRow("Order ID",o.id)+detailRow("Date",o.created_at?new Date(o.created_at).toLocaleString():"—")+detailRow("Order type",o.order_type||"purchase")+detailRow("Quantity",items.reduce((n,x)=>n+Number(x.quantity||1),0)||1)+detailRow("Amount",money(o.total_usdt??items.reduce((n,x)=>n+Number(x.subtotal_usdt||0),0))+" USDT")+detailRow("Status",historyDisplayStatus(o));
   if(o.supplier_message)body+=detailRow("Latest update",o.supplier_message);
-  body+='<div style="margin-top:14px"><button class="btn blue" onclick="loadDashboardData()">Refresh order status</button></div>';
+
  }
  $("orderDetailsContent").innerHTML='<h2>'+esc(title)+'</h2><p class="sub">Order details</p><div class="history-detail-list">'+body+'</div>';
  $("orderDetailsModal").classList.remove("hidden");window.scrollTo({top:0,behavior:"smooth"});
