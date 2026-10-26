@@ -360,7 +360,7 @@ async function syncSupplierOrderStatuses(rows){
   const items=Array.isArray(o.items)?o.items:[];
   const linked=items.some(it=>(currentData.tools||[]).some(t=>t.id===it.tool_id&&(t.supplier_product_id||t.supplier_status||t.supplier_group_type||t.supplier_service_type)));
   if(!linked){o.supplier_status=null;return}
-  if(["refunded","cancelled","failed"].includes(String(o.status||"").toLowerCase())){o.supplier_status="failed";o.supplier_label="Rejected — wallet refund status";o.supplier_message="Supplier order failed. Check your wallet transaction history for the refund.";return}
+  if(["refunded","cancelled","failed","rejected"].includes(String(o.status||"").toLowerCase())){o.supplier_status="rejected";o.supplier_label="Rejected";o.supplier_message="This order could not be completed. Please contact support if you need assistance.";return}
   try{
    let data=null,error=null;
    // Paid orders are dispatched immediately when the customer dashboard loads.
@@ -386,6 +386,11 @@ async function syncSupplierOrderStatuses(rows){
    o.supplier_status=String(data.status||"pending").toLowerCase();
    o.supplier_label=String(data.label||"Waiting for supplier");
    o.supplier_message=String(data.message||data.error||"");
+   // Keep supplier-side failures and internal dispatch details private from customers.
+   if(["failed","cancelled","refunded","rejected"].includes(o.supplier_status)){
+    o.supplier_status="rejected";o.supplier_label="Rejected";
+    o.supplier_message="This order could not be completed. Please contact support if you need assistance.";
+   }
    o.supplier_reference=data.supplier_reference||data.supplier_order?.external_order_id||o.supplier_reference||null;
    const details=data.supplier_details||data.supplier_order?.activation_data?.supplier_details||data.supplier_order?.activation_data?.supplier_response||null;
    if(details)o.supplier_details=details;
