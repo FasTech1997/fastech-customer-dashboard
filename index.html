@@ -351,7 +351,7 @@ async function loadDashboardData(){
 }
 function renderTransactions(rows){
  const empty='<tr><td colspan="5" style="color:#9ab7d8">No transactions yet.</td></tr>';
- const body=rows.length?rows.map(x=>{const debit=String(x.type||"").toLowerCase()==="debit";return `<tr><td>${esc(new Date(x.created_at).toLocaleString())}</td><td>${esc(x.type||"Wallet")}</td><td>${esc(x.note||x.reference||"Wallet transaction")}</td><td>${debit?"-":"+"}$${Math.abs(Number(x.amount_usdt||0)).toFixed(2)}</td><td><span class="status confirmed">Recorded</span></td></tr>`}).join(""):empty;
+ const body=rows.length?rows.map(x=>{const txType=String(x.type||"Wallet"),rawText=[x.note,x.reference].filter(Boolean).join(" "),isRefund=txType.toLowerCase()==="refund"||/automatic refund|supplier rejected or failed order|supplier-refund:/i.test(rawText);const debit=String(x.type||"").toLowerCase()==="debit";const displayType=isRefund?"Refunded":txType;const displayNote=isRefund?"Refunded":(x.note||x.reference||"Wallet transaction");return `<tr><td>${esc(new Date(x.created_at).toLocaleString())}</td><td>${esc(displayType)}</td><td>${esc(displayNote)}</td><td>${debit?"-":"+"}${Math.abs(Number(x.amount_usdt||0)).toFixed(2)}</td><td><span class="status confirmed">Recorded</span></td></tr>`}).join(""):empty;
  $("recentTx").innerHTML=body;$("allTx").innerHTML=body;
 }
 async function syncSupplierOrderStatuses(rows){
