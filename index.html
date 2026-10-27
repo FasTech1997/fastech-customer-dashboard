@@ -419,9 +419,8 @@ function renderOrders(rows){
  const filteredRentals=rentals.filter(r=>!orders.some(o=>{const a=Date.parse(o.date||""),b=Date.parse(r.date||"");return o.type==="rental"&&o.toolIds.some(id=>r.toolIds.includes(id))&&Math.abs(o.amount-r.amount)<0.0001&&Number.isFinite(a)&&Number.isFinite(b)&&Math.abs(a-b)<=120000;}));
  const all=[...orders,...filteredRentals].sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
  host.innerHTML=all.length?all.map(x=>{const icon=x.icon?'<img class="history-product-image" src="'+esc(x.icon)+'" alt="">':(x.kind==="rental"?"⏱":"🧾");return '<button type="button" class="history-item" style="width:100%;text-align:left" data-history-kind="'+esc(x.kind)+'" data-history-index="'+x.index+'"><span class="history-icon">'+icon+'</span><span class="history-main"><strong>'+esc(x.name)+'</strong><small>'+esc(x.date?new Date(x.date).toLocaleString():"Date unavailable")+'</small>'+(x.kind==="order"?'<small class="order-id-label">ORDER ID: '+esc(x.id||"—")+'</small>':'')+'<span class="history-item-bottom"><b>'+money(x.amount)+' USDT</b><span class="history-status '+historyStatusClass(x.label)+'">'+esc(x.label)+'</span></span></span><span class="history-chevron">›</span></button>'}).join(""):'<div class="history-empty">No orders or rentals yet.</div>';
-}
-
  host.onclick=function(event){const card=event.target.closest("button[data-history-kind][data-history-index]");if(!card)return;event.preventDefault();viewHistoryDetails(card.getAttribute("data-history-kind"),Number(card.getAttribute("data-history-index")));};
+}
 function viewHistoryDetails(kind,index){
  let title="",body="",id="",date=null,amount=0,status="Pending",reply="";
  if(kind==="rental"){
