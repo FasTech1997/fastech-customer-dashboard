@@ -380,7 +380,7 @@ async function syncSupplierOrderStatuses(rows){
    }
    if(!data||error){
     o.supplier_status="pending";o.supplier_label="Supplier confirmation pending";
-    o.supplier_message=error?.message||data?.error||"Supplier has not confirmed the order yet.";
+    o.supplier_message="Supplier status has not returned yet. Please do not submit this order again.";
     o.supplier_reference=o.supplier_reference||null;return;
    }
    o.supplier_status=String(data.status||"pending").toLowerCase();
@@ -396,7 +396,7 @@ async function syncSupplierOrderStatuses(rows){
    if(details)o.supplier_details=details;
   }catch(e){
    o.supplier_status="pending";o.supplier_label="Supplier confirmation pending";
-   o.supplier_message=e?.message||"Supplier status has not been returned yet.";
+   o.supplier_message="Supplier status has not returned yet. Please do not submit this order again.";
    o.supplier_reference=o.supplier_reference||null;
   }
  }));
