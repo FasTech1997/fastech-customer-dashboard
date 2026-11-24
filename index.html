@@ -34,6 +34,19 @@
 
 .binance-pay-card{background:linear-gradient(145deg,#101d38,#0b2550);border:1px solid #2b68a4;border-radius:15px;padding:18px;margin-bottom:17px}.binance-pay-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.binance-pay-head h3{margin:0 0 5px;font-size:18px}.binance-pay-head p{margin:0;color:#9ab7d8;font-size:12px}.binance-pay-body{display:flex;justify-content:center;margin:18px 0}.binance-qr-wrap{background:#fff;border-radius:14px;padding:14px;text-align:center;color:#0b2550;width:240px}.binance-qr-wrap img{display:block;width:210px;height:210px;object-fit:contain;margin:auto}.binance-qr-wrap div{font-weight:800;font-size:12px;margin-top:8px}.binance-qr-state{width:min(620px,100%);display:flex;align-items:center;gap:15px;background:#071a35;border:1px dashed #2b68a4;border-radius:12px;padding:18px;color:#dceeff}.binance-qr-placeholder{width:72px;height:72px;flex:0 0 72px;border-radius:12px;background:#f0b90b;color:#111;display:grid;place-items:center;font-size:34px;font-weight:900}.binance-qr-state strong{font-size:14px}.binance-qr-state p{margin:6px 0 0;color:#9ab7d8;font-size:12px;line-height:1.5}.binance-pay-note{font-size:11px;color:#9ab7d8;border-top:1px solid #1b4d86;padding-top:12px}.binance-pay-note strong{color:#f4cf55}.deposit-qr{background:#fff;border-radius:14px;padding:14px;width:240px;text-align:center;color:#0b2550;border:1px solid #cfe2f5}.deposit-qr img{display:block;width:210px;height:210px;object-fit:contain;margin:auto}.deposit-qr small{display:block;margin-top:8px;font-weight:700}.deposit-test-note{margin-top:12px;font-size:11px;color:#9ab7d8;line-height:1.5}.deposit-pending{background:#071a35;border:1px solid #24547f;border-radius:12px;padding:14px;margin-top:14px}.deposit-pending strong{color:#8af0c6}.deposit-pending code{color:#dff0ff;word-break:break-all}
 
+
+/* Keep navigation available while browsing long product lists */
+@media(min-width:761px){
+ .sidebar{position:sticky;top:0;height:100vh;max-height:100vh;align-self:flex-start;overflow:hidden}
+ .sidebar-menu{overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#2871ad #071a38}
+ .sidebar-menu nav{flex:0 0 auto}
+ .sidebar-menu .logout{position:sticky;bottom:0;z-index:2;flex-shrink:0;margin-top:auto}
+}
+/* The mobile drawer fills the screen so Logout stays at its bottom */
+@media(max-width:760px){
+ .sidebar-menu.open{height:100dvh;max-height:100dvh;min-height:100dvh}
+ .sidebar-menu.open .logout{position:sticky;bottom:0;z-index:2;flex-shrink:0;margin-top:auto;background:linear-gradient(135deg,#0878f9,#0754c7)}
+}
 /* Left navigation drawer: desktop sidebar and mobile slide-in menu */
 .sidebar-header{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .menu-toggle{display:none;background:#153252;color:#fff;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14px;font-weight:700;cursor:pointer}
