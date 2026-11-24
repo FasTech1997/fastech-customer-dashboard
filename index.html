@@ -201,35 +201,20 @@
  </div>
 </aside>
 <main class="main">
- <div class="top"><input class="search" placeholder="⌕   Search tools, services, or anything..."><div class="topright"><span>🔔</span><span><span id="greetingText">Good morning,</span><br><strong id="topName" style="color:white">Customer</strong></span></div></div>
+ <div class="top"><div class="topright"><span>🔔</span><span><span id="greetingText">Good morning,</span><br><strong id="topName" style="color:white">Customer</strong></span></div></div>
  <div class="heading"><div><h1 id="pageTitle">Dashboard</h1><p>Fast, secure and reliable online tools services.</p></div><span class="tag">CUSTOMER AREA</span></div>
 
  <section class="section active" id="dashboard">
   <div id="promotionsStrip" class="promo-grid" aria-live="polite"></div>
+  <div class="card wallet" style="margin-bottom:17px"><div class="wallet-top"><div><h2>USDT Wallet Balance</h2><div class="amount" id="walletAmount">$0.00 <small>USDT</small></div></div><div class="coin">₮</div></div><div class="wallet-stats"><div><small>Pending Deposits</small><strong>$0.00</strong></div><div><small>Total Spent</small><strong>$0.00</strong></div><div><small>Total Deposits</small><strong>$0.00</strong></div></div><div class="actions" style="display:flex;gap:9px;margin-top:16px"><button class="btn blue" data-section-link="deposit" style="flex:1">▣ Deposit USDT</button><button class="btn outline" data-section-link="transactions" style="flex:1">▤ Transactions</button></div></div>
   <div class="grid">
    <div class="card stat"><div class="icon">▣</div><div><small>USDT Balance</small><strong id="balance">$0.00 <span class="up">↗</span></strong></div></div>
    <div class="card stat"><div class="icon green">◷</div><div><small>Active Rentals</small><strong id="rentalCount">0</strong></div></div>
    <div class="card stat"><div class="icon purple">▤</div><div><small>Server Credits</small><strong id="creditCount">0</strong></div></div>
    <div class="card stat"><div class="icon orange">🛒</div><div><small>Total Orders</small><strong id="orderCount">0</strong></div></div>
   </div>
-  <div class="layout">
-   <div>
-    <div class="card"><div style="display:flex;justify-content:space-between;gap:10px"><div><h2>Available Services</h2><p class="sub">Explore our tools and services. Choose what you need.</p></div><button class="btn outline" data-section-link="marketplace">View All →</button></div>
-     <div class="services">
-      <div class="service"><div class="bigicon">🛠</div><h3>Tools Marketplace</h3><p>Buy genuine mobile phone tools and accessories.</p><button class="btn blue" data-section-link="marketplace">Browse Tools →</button></div>
-      <div class="service"><div class="bigicon">◷</div><h3>Rental Service</h3><p>Rent professional tools for a limited time.</p><button class="btn purple" data-section-link="rental">Rent Now →</button></div>
-      <div class="service"><div class="bigicon">▤</div><h3>Server Services</h3><p>Get server solutions for mobile devices.</p><button class="btn green" data-section-link="server">View Services →</button></div>
-      
-     </div>
-    </div>
-    <div class="card" style="margin-top:17px"><h2>Recent Transactions</h2><p class="sub">Your latest account activity.</p><div class="tablewrap"><table class="table"><thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead><tbody id="recentTx"><tr><td colspan="5" style="color:#9ab7d8">No transactions yet.</td></tr></tbody></table></div></div>
-   </div>
-   <div>
-    <div class="card wallet"><div class="wallet-top"><div><h2>USDT Wallet Balance</h2><div class="amount" id="walletAmount">$0.00 <small>USDT</small></div></div><div class="coin">₮</div></div><div class="wallet-stats"><div><small>Pending Deposits</small><strong>$0.00</strong></div><div><small>Total Spent</small><strong>$0.00</strong></div><div><small>Total Deposits</small><strong>$0.00</strong></div></div><div class="actions" style="display:flex;gap:9px;margin-top:16px"><button class="btn blue" data-section-link="deposit" style="flex:1">▣ Deposit USDT</button><button class="btn outline" data-section-link="transactions" style="flex:1">▤ Transactions</button></div></div>
-    <div class="card" style="margin-top:17px"><h2>Quick Actions</h2><p class="sub">Common customer actions.</p><div class="quick"><button class="qgreen" data-section-link="deposit">▣ <span><strong>Make a Deposit</strong><small>Add funds to your wallet</small></span></button><button class="qpurple" data-section-link="rental">🛒 <span><strong>Rent a Tool</strong><small>Get tools for your work</small></span></button><button class="qblue" data-section-link="support">♧ <span><strong>Open Support Ticket</strong><small>Get help from our team</small></span></button></div></div>
-    <div class="card" style="margin-top:17px"><h2>Your Active Rentals</h2><p class="sub">Your current rental requests.</p><div id="activeRentalList" class="rental-list" style="color:#9ab7d8">No active rentals yet.</div></div>
-   </div>
-  </div>
+  <div class="card" style="margin-bottom:17px"><h2>Quick Actions</h2><p class="sub">Common customer actions.</p><div class="quick"><button class="qgreen" data-section-link="deposit">▣ <span><strong>Make a Deposit</strong><small>Add funds to your wallet</small></span></button><button class="qpurple" data-section-link="rental">🛒 <span><strong>Rent a Tool</strong><small>Get tools for your work</small></span></button><button class="qblue" data-section-link="support">♧ <span><strong>Open Support Ticket</strong><small>Get help from our team</small></span></button></div></div>
+  <div class="card"><h2>Your Active Rentals</h2><p class="sub">Your current rental requests.</p><div id="activeRentalList" class="rental-list" style="color:#9ab7d8">No active rentals yet.</div></div>
  </section>
 
  <section class="section" id="marketplace"><div class="card"><h2>Tools Marketplace</h2><p class="sub">Buy tools directly using your USDT wallet balance.</p><div id="marketplaceTools" class="services"><div class="service"><p>Loading tools...</p></div></div></div></section>
