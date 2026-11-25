@@ -479,6 +479,8 @@ function viewHistoryDetails(kind,index){
   const productIds=items.map(item=>(currentData.tools||[]).find(t=>String(t.id)===String(item.tool_id))).filter(Boolean).map(t=>String(t.external_product_id||t.product_number||'—'));
   body=detailRow("Order type",o.order_type||"purchase")+detailRow("Product ID",[...new Set(productIds)].join(', ')||'—')+detailRow("Quantity",items.reduce((n,x)=>n+Number(x.quantity||1),0)||1);
   if(rentalForLogin)body+=detailRow("Period",rentalForLogin.period||"Rental")+detailRow("Expires",rentalForLogin.expires_at?new Date(rentalForLogin.expires_at).toLocaleString():"—");
+  const savedInputs=Array.isArray(o.customer_inputs)?o.customer_inputs:[];
+  savedInputs.forEach(entry=>{const fields=entry?.fields&&typeof entry.fields==="object"?entry.fields:{};Object.entries(fields).forEach(([key,value])=>{body+=detailRow(key,String(value??"—"))})});
   // Supplier diagnostics and raw failure messages are intentionally never shown in customer order details.
  }
  const good=["success","successful","active"].includes(String(status).toLowerCase()),rejected=String(status).toLowerCase()==="rejected",expired=String(status).toLowerCase()==="expired";
