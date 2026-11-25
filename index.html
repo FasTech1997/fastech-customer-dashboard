@@ -336,7 +336,7 @@ async function enterApp(user){
  $("authScreen").classList.add("hidden");$("appScreen").classList.remove("hidden");try{await loadDashboardData()}catch(err){console.error("FasTech dashboard load error:",err);toast("Signed in, but dashboard data could not load: "+(err?.message||"Please refresh."),true)}finally{enteringUserId=null}
 }
 async function loadDashboardData(){
- const {data,error}=await sb.rpc("get_customer_usdt_dashboard");
+ const {data,error}=await sb.rpc("get_customer_usdt_dashboard_with_remote");
  if(error){toast("Could not load dashboard: "+error.message,true);return}
  currentData=data||{tools:[],orders:[],rentals:[],transactions:[],usdt_balance:0};
  await loadOwnRentalStock();
@@ -631,7 +631,7 @@ function openToolOrderPreview(toolId,type){
  const inputBox=$("orderCustomerInputs");
  if(inputBox){
   const fields=Array.isArray(tool.customer_input_fields)?tool.customer_input_fields:[];
-  if(isRental){
+  if(isRental&&!tool.remote_service){
    inputBox.innerHTML='<h3>Service Details</h3><p class="sub">No extra information is needed for this rental request.</p>';
    inputBox.dataset.fields="[]";inputBox.classList.add("hidden");
   }else if(fields.length){
@@ -669,7 +669,7 @@ async function confirmToolOrder(){
  if(!$("orderPreviewTerms").checked)return toast("Please agree to the terms and conditions before ordering.",true);
  const {toolId,type,price}=pendingToolOrder,tool=(currentData?.tools||[]).find(t=>t.id===toolId);if(!tool)return toast("Service is no longer available. Refresh and try again.",true);
  const customerFields={};const inputBox=$("orderCustomerInputs");
- if(type!=="rental"){
+ if(type!=="rental"||tool.remote_service){
   if(inputBox?.dataset.fields==="missing")return toast("This service is not configured for ordering yet. Please contact FasTech support; your wallet has not been charged.",true);
   const controls=inputBox?.querySelectorAll("[data-customer-key]")||[];
   for(const control of controls){
@@ -682,7 +682,7 @@ async function confirmToolOrder(){
  if(Number(currentData.usdt_balance||0)<price)return toast("Insufficient USDT balance. You need "+money(price)+" USDT.",true);
  const btn=$("orderPreviewSubmit");btn.disabled=true;btn.textContent="PROCESSING ORDER…";
  try{
-  const {data,error}=await sb.functions.invoke("place-tool-order",{body:{tool_id:toolId,quantity:1,order_type:type,customer_fields:type==="rental"?{}:customerFields}});
+  const {data,error}=await sb.functions.invoke("place-tool-order",{body:{tool_id:toolId,quantity:1,order_type:type,customer_fields:customerFields}});
   if(error)throw error;if(data?.error)throw new Error(data.error);
   closeOrderPreview();showSection("orders");toast(data?.fulfillment==="queued_pending_supplier"?"Order placed and queued. Waiting for supplier processing.":"Order recorded in Order History. Supplier processing may still be pending.");loadDashboardData().catch(refreshError=>{console.error("Order placed, but Order History refresh failed:",refreshError);toast("Your order was placed. Order History is open; refresh the page if the new order does not appear yet.",true)});
  }catch(e){toast(e?.message||"Order failed. Your wallet should not be charged for a rejected order.",true)}
