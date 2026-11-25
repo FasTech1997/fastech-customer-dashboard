@@ -646,7 +646,7 @@ function openToolOrderPreview(toolId,type){
       const opts=String(f.options).split(/[,;\\n]/).map(v=>v.trim()).filter(Boolean);
       control='<select data-customer-key="'+esc(key)+'" '+(required?'required':'')+'><option value="">Choose '+esc(label)+'</option>'+opts.map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('')+'</select>';
     }else{
-      const htmlType=["email","number","text","url","tel"].includes(type)?type:"text";
+      const htmlType=["email","number","text","url","tel","password"].includes(type)?type:"text";
       control='<input data-customer-key="'+esc(key)+'" type="'+htmlType+'" '+(required?'required':'')+' placeholder="Enter '+esc(label)+'" autocomplete="off">';
     }
     return '<label class="field">'+esc(label)+(required?' *':'')+control+(desc?'<small>'+esc(desc)+'</small>':'')+'</label>';
