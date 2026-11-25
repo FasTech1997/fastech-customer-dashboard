@@ -611,9 +611,10 @@ function openToolOrderPreview(toolId,type){
  const supplierStatus=String(tool.supplier_status||"").trim();
  const normalizedSupplierStatus=supplierStatus.toLowerCase().replace(/[\\s-]+/g,"_");
  const ownStock=isRental?ownRentalStockByTool[tool.id]:null;
- const ownRentalProduct=isRental&&!tool.supplier_product_linked&&!tool.supplier_group_type&&!tool.supplier_service_type;
+ const ownRentalProduct=isRental&&!tool.remote_service&&!tool.supplier_product_linked&&!tool.supplier_group_type&&!tool.supplier_service_type;
  let statusLabel="Pending",statusClass="";
- if(isRental&&(ownStock||ownRentalProduct)){
+ if(isRental&&tool.remote_service){statusLabel="Online";statusClass="online";}
+ else if(isRental&&(ownStock||ownRentalProduct)){
   statusLabel=ownStock&&ownStock.available>0?"Online":"Out of Stock";
   statusClass=statusLabel==="Online"?"online":"out-of-stock";
  }else if(["active","online","available","success","successful"].includes(normalizedSupplierStatus)){
