@@ -253,12 +253,21 @@
  <section class="section" id="activation"><div class="card"><h2>Activation Tools</h2><p class="sub">Activation services offered by FasTech. Services may be temporarily unavailable while availability is being confirmed.</p><div id="activationTools" class="services"><div class="rental-empty">Loading activation tools…</div></div></div></section>
  <section class="section" id="deposit"><div class="card"><h2>Payment / Deposit</h2><p class="sub">Add funds to your FasTech wallet using the available payment options.</p>
 <div class="binance-pay-card">
- <div class="binance-pay-head"><div><h3>Binance Pay</h3><p>Scan the official FasTech Binance Pay QR with the Binance app.</p></div><span class="tag">QUICK PAYMENT</span></div>
+ <div class="binance-pay-head"><div><h3>Binance Pay – USDT</h3><p>Scan this FasTech Binance Pay receive QR in your Binance app and select USDT before sending.</p></div><span class="tag">USDT ONLY</span></div>
  <div class="binance-pay-body">
-  <div id="binanceQrState" class="binance-qr-state"><div class="binance-qr-placeholder">₿</div><div><strong>Binance Pay QR not connected yet</strong><p>The QR will appear here after the official FasTech Binance Pay receive QR is added. No customer form is required.</p></div></div>
-  <div id="binanceQrWrap" class="binance-qr-wrap hidden"><img id="binanceQrImage" alt="FasTech Binance Pay QR"><div id="binanceQrCaption">Scan with Binance Pay</div></div>
+  <div id="binanceQrState" class="binance-qr-state"><div class="binance-qr-placeholder">₿</div><div><strong>Loading FasTech Binance Pay QR…</strong><p>If the QR does not appear, refresh this page.</p></div></div>
+  <div id="binanceQrWrap" class="binance-qr-wrap hidden"><div id="binanceQrCanvas" style="width:210px;height:210px;margin:auto"></div><div id="binanceQrCaption">Scan with Binance Pay – choose USDT</div></div>
  </div>
- <div class="binance-pay-note"><strong>Important:</strong> the QR must be FasTech's official Binance Pay receive QR. We will not generate a fake or unrelated QR.</div>
+ <div class="binance-pay-note">Binance UID: <strong>1221909049</strong><br><strong>Important:</strong> select <strong>USDT</strong> in Binance Pay before sending. Send USDT only. Funds are added to your FasTech wallet after an admin verifies the payment in Binance.</div>
+ <div class="card" style="margin-top:14px;background:#071a35;border-color:#24547f">
+  <h3 style="margin:0 0 6px">Submit Binance Pay payment</h3>
+  <p class="sub">After paying, enter the amount and Binance transaction ID. Your request will remain pending until FasTech verifies receipt of the USDT.</p>
+  <div class="field"><label>Amount sent (USDT)</label><input id="binanceUsdtAmount" type="number" min="0.01" step="0.01" placeholder="Example: 10.00"></div>
+  <div class="field"><label>Binance transaction ID / payment reference</label><input id="binanceTxId" type="text" maxlength="160" placeholder="Enter Binance transaction ID" autocomplete="off"></div>
+  <div class="field"><label>Optional note</label><input id="binancePaymentNote" type="text" maxlength="240" placeholder="Any additional information"></div>
+  <button class="btn green" id="binanceProofBtn" type="button">Submit payment for verification</button>
+  <div id="binanceProofStatus" class="message" aria-live="polite"></div>
+ </div>
 </div>
 <div class="notice"><strong>Malawi Mobile Money:</strong> pay in MWK using <b>Airtel Money</b> or <b>TNM Mpamba</b>. After the payment is confirmed, FasTech automatically converts the payment to USDT and credits your wallet.</div>
 <div class="card" style="margin:14px 0;background:#071a35;border-color:#24547f">
@@ -287,8 +296,9 @@
 const SUPABASE_URL="https://elizbbhavrhlzepynvmb.supabase.co";
 const SUPABASE_KEY="sb_publishable_JNCEOSbaOKTlsIPpmdWlLA_0705n11o";
 const RECEIVING_ADDRESS="THeaEcztwe6VugEh3Vie3RfH9j4uJzRHLV";
-// Add only the official FasTech Binance Pay receive QR image URL here when available.
-const BINANCE_PAY_QR_IMAGE="";
+// This is the exact receive link encoded in the QR image supplied by the FasTech owner.
+const BINANCE_PAY_RECEIVE_LINK="https://app.binance.com/uni-qr/WjbBvtLH";
+const BINANCE_PAY_UID="1221909049";
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 let currentUser=null,currentProfile=null,currentData={tools:[],orders:[],rentals:[],transactions:[]},currentDepositIntent=null;
 const titles={dashboard:"Dashboard",marketplace:"Tools Marketplace",rental:"Rental Service",server:"Server Services",imei:"IMEI Services",activation:"Activation Tools",deposit:"Payment / Deposit",myrentals:"My Rentals",orders:"My Orders",transactions:"Transactions",support:"Support",profile:"My Profile"};
@@ -300,20 +310,42 @@ function money(v){return "$"+Number(v||0).toFixed(2)}
 let currentSection="dashboard";let dashboardHistoryReady=false;function showSection(id,trackHistory=true){if(!$(id)||!$(id).classList.contains("section"))return;if(trackHistory&&id!==currentSection){if(!dashboardHistoryReady){history.replaceState({fasTechApp:true,section:currentSection},"",location.pathname+location.search+"#"+currentSection);dashboardHistoryReady=true}history.pushState({fasTechApp:true,section:id},"","#"+id)}document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));$(id).classList.add("active");currentSection=id;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.section===id));$("pageTitle").textContent=titles[id]||id;window.scrollTo({top:0,behavior:"smooth"})}window.addEventListener("popstate",e=>{if(!$("appScreen")||$("appScreen").classList.contains("hidden"))return;const target=e.state&&e.state.fasTechApp&&e.state.section;if(target&&$(target)&&$(target).classList.contains("section"))showSection(target,false);else if(currentSection!=="dashboard")showSection("dashboard",false);else{history.pushState({fasTechApp:true,section:"dashboard"},"",location.pathname+location.search+"#dashboard")}});
 function demoAction(msg){toast(msg)}
 function renderBinancePayQR(){
- const state=$("binanceQrState"),wrap=$("binanceQrWrap"),img=$("binanceQrImage");
+ const state=$("binanceQrState"),wrap=$("binanceQrWrap"),holder=$("binanceQrCanvas");
  const depositQr=$("depositQrImage");
  if(depositQr){
-   depositQr.removeAttribute("src");
-   const qrBox=depositQr.parentElement;
-   depositQr.style.display="none";
-   let holder=document.getElementById("depositQrCanvas");
-   if(!holder){holder=document.createElement("div");holder.id="depositQrCanvas";holder.style.width="210px";holder.style.height="210px";holder.style.margin="auto";depositQr.parentElement.insertBefore(holder,depositQr);}
-   holder.innerHTML="";
-   if(window.QRCode){new QRCode(holder,{text:RECEIVING_ADDRESS,width:210,height:210,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});}
-   else {holder.innerHTML='<div style="padding:20px;color:#0b2550">QR library could not load. Copy the address below.</div>';}
+   depositQr.removeAttribute("src");depositQr.style.display="none";
+   let depositHolder=document.getElementById("depositQrCanvas");
+   if(!depositHolder){depositHolder=document.createElement("div");depositHolder.id="depositQrCanvas";depositHolder.style.width="210px";depositHolder.style.height="210px";depositHolder.style.margin="auto";depositQr.parentElement.insertBefore(depositHolder,depositQr);}
+   depositHolder.innerHTML="";
+   if(window.QRCode){new QRCode(depositHolder,{text:RECEIVING_ADDRESS,width:210,height:210,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M});}
  }
- if(BINANCE_PAY_QR_IMAGE){img.src=BINANCE_PAY_QR_IMAGE;state.classList.add("hidden");wrap.classList.remove("hidden")}
- else{state.classList.remove("hidden");wrap.classList.add("hidden")}
+ if(holder&&window.QRCode){
+   holder.innerHTML="";
+   new QRCode(holder,{text:BINANCE_PAY_RECEIVE_LINK,width:210,height:210,colorDark:"#000000",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});
+   state.classList.add("hidden");wrap.classList.remove("hidden");
+ }else{
+   state.classList.remove("hidden");wrap.classList.add("hidden");
+ }
+}
+async function submitBinancePayProof(){
+ const amount=Number($("binanceUsdtAmount").value);
+ const txid=$("binanceTxId").value.trim();
+ const note=$("binancePaymentNote").value.trim();
+ const status=$("binanceProofStatus"),btn=$("binanceProofBtn");
+ if(!currentUser)return toast("Please log in before submitting a payment.",true);
+ if(!Number.isFinite(amount)||amount<0.01||amount>100000)return toast("Enter a valid USDT amount.",true);
+ if(txid.length<5)return toast("Enter the Binance transaction ID or payment reference.",true);
+ btn.disabled=true;btn.textContent="Submitting…";status.textContent="Sending your payment for admin verification…";
+ try{
+  const subject="Binance Pay USDT deposit verification";
+  const messageText="Payment method: Binance Pay\\nCurrency: USDT\\nAmount sent: "+amount.toFixed(8)+" USDT\\nBinance UID paid to: "+BINANCE_PAY_UID+"\\nBinance transaction ID / reference: "+txid+"\\nCustomer note: "+(note||"None")+"\\nStatus: PENDING ADMIN VERIFICATION. Do not credit wallet until funds are verified in Binance.";
+  const {error}=await sb.from("support_tickets").insert({user_id:currentUser.id,subject,category:"payment",priority:"high",status:"open",message:messageText});
+  if(error)throw error;
+  status.textContent="Submitted successfully. Your request is pending FasTech admin verification. Your wallet has not been credited yet.";
+  $("binanceUsdtAmount").value="";$("binanceTxId").value="";$("binancePaymentNote").value="";
+  toast("Binance Pay verification request submitted.");
+ }catch(e){status.textContent=e?.message||"Could not submit payment details.";toast(e?.message||"Could not submit payment details.",true)}
+ finally{btn.disabled=false;btn.textContent="Submit payment for verification"}
 }
 async function loadUser(){const {data:{session}}=await sb.auth.getSession();if(session)await enterApp(session.user);else{$("authScreen").classList.remove("hidden");$("appScreen").classList.add("hidden")}}
 function updateTimeGreeting(){
@@ -732,6 +764,7 @@ document.addEventListener("click",event=>{const menu=$("sidebarMenu");if(menu?.c
 document.querySelectorAll("nav button").forEach(b=>b.addEventListener("click",()=>{showSection(b.dataset.section);if(window.matchMedia("(max-width:760px)").matches)closeSidebarMenu()}));
 document.querySelectorAll("[data-section-link]").forEach(b=>b.addEventListener("click",()=>showSection(b.dataset.sectionLink)));
 $("mobileMoneyPayBtn").onclick=startMobileMoneyPayment;
+const binanceProofButton=$("binanceProofBtn");if(binanceProofButton)binanceProofButton.onclick=submitBinancePayProof;
 loadMobileMoneyRate();
 $("ticketBtn").onclick=submitTicket;
 $("rentalSearch").addEventListener("input",e=>{rentalSearchText=e.target.value.trim().toLowerCase();renderRentalCatalog()});$("serverSearch").addEventListener("input",e=>{serverSearchText=e.target.value.trim().toLowerCase();renderServerCatalog()});$("imeiSearch").addEventListener("input",()=>renderImeiServices(currentData.imei_services||[]));document.querySelectorAll("[data-server-filter]").forEach(b=>b.addEventListener("click",()=>{serverFilter=b.dataset.serverFilter;document.querySelectorAll("[data-server-filter]").forEach(x=>x.classList.toggle("active",x===b));renderServerCatalog()}));
